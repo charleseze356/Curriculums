@@ -29,8 +29,39 @@
       "number": 2,
       "title": "AI System Design",
       "goal": "Design LLM-based systems end-to-end and implement any pattern — with or without a framework.",
-      "topics": [],
-      "status": "planned"
+      "topics": [
+        {
+          "id": "ch2-system-thinking",
+          "title": "System thinking",
+          "items": [
+            { "id": "0008", "type": "lesson",  "title": "What can you build with LLMs? — system types and the Staircase",  "file": "lessons/0008-llm-system-types.html" },
+            { "id": "0009", "type": "lesson",  "title": "Cognitive architecture — designing data flow",                    "file": "lessons/0009-cognitive-architecture.html" },
+            { "id": "0010", "type": "lesson",  "title": "The golden rule: use as little AI as possible",                  "file": "lessons/0010-minimize-ai.html" }
+          ]
+        },
+        {
+          "id": "ch2-workflows",
+          "title": "Workflows and tools",
+          "items": [
+            { "id": "0011", "type": "lesson",  "title": "LLM call chaining and parallelization",                          "file": "lessons/0011-llm-chaining.html" },
+            { "id": "0012", "type": "lesson",  "title": "Tool calling — giving your LLM hands",                           "file": "lessons/0012-tool-calling.html" },
+            { "id": "0013", "type": "lesson",  "title": "Agentic loops — letting the LLM decide what to do next",         "file": "lessons/0013-agentic-loops.html" },
+            { "id": "0014", "type": "lesson",  "title": "Evaluator-optimizer and LLM routers",                            "file": "lessons/0014-evaluator-router.html" },
+            { "id": "P004", "type": "project", "title": "Build a multi-step document processing pipeline",                "file": "lessons/P004-document-pipeline.html" }
+          ]
+        },
+        {
+          "id": "ch2-frameworks",
+          "title": "Frameworks and agents",
+          "items": [
+            { "id": "0015", "type": "lesson",          "title": "LangChain and LangGraph — orchestration explained",       "file": "lessons/0015-langchain-langgraph.html" },
+            { "id": "0016", "type": "lesson",          "title": "PydanticAI — type-safe AI workflows",                    "file": "lessons/0016-pydantic-ai.html" },
+            { "id": "0017", "type": "lesson",          "title": "Building agents from scratch — no framework needed",     "file": "lessons/0017-agents-from-scratch.html" },
+            { "id": "P005", "type": "project",         "title": "Build a research agent from scratch",                    "file": "lessons/P005-agent-from-scratch.html" },
+            { "id": "P006", "type": "chapter-project", "title": "Automated research assistant",                           "file": "lessons/P006-ch2-research-assistant.html" }
+          ]
+        }
+      ]
     },
     {
       "id": "ch3",

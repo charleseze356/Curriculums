@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic loops — letting the LLM decide what to do next — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 2: AI System Design
+    <span>›</span>
+    Lesson 13
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 2 · Lesson 13</p>
+    <h1>Agentic loops — letting the LLM decide what to do next</h1>
+    <p class="lesson-desc">35–45 min read · Hands-on coding</p>
+  </header>
+
+  <section id="motivation">
+    <h2>Motivation</h2>
+    <p>
+      In chaining (Lesson 11), you decide the sequence of steps in advance. In tool calling
+      (Lesson 12), the model decides which tool to call — but you still control when the loop
+      ends. An <strong>agentic loop</strong> removes that control entirely: the model decides
+      what to do at each step, takes actions, observes the results, and continues until it
+      decides the task is complete.
+    </p>
+    <p>
+      This is what separates an "AI assistant that can use tools" from an "AI agent". Agents
+      are powerful — and genuinely harder to control. This lesson teaches both the pattern
+      and the safety mechanisms that make it production-safe.
+    </p>
+  </section>
+
+  <section id="prerequisites">
+    <div class="learning-outcomes">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0012-tool-calling.html">Lesson 12</a>: the two-phase tool call exchange — the agentic loop extends this pattern</li>
+        <li><a href="0011-llm-chaining.html">Lesson 11</a>: chaining — you need to understand what an agent replaces and when</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="agent-vs-chain">
+    <h2>Agent vs chain: the key distinction</h2>
+    <p>
+      In a <strong>chain</strong>, you decide the steps: extract → assess → summarise. The
+      model executes each step and produces the typed output you requested. The flow is fixed.
+    </p>
+    <p>
+      In an <strong>agent</strong>, the model decides the steps. You give it a goal ("research
+      the market size of the EV battery industry") and a set of tools. It chooses which tools
+      to call, in what order, how many times, based on what it observes. You do not know in
+      advance whether it will search once or ten times, or call the calculator, or ask for
+      clarification.
+    </p>
+    <table>
+      <thead>
+        <tr><th></th><th>Chain</th><th>Agent</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Step sequence</td><td>Fixed by you</td><td>Decided by the LLM</td></tr>
+        <tr><td>Number of LLM calls</td><td>Known in advance</td><td>Variable — 1 to N</td></tr>
+        <tr><td>Failure mode</td><td>One bad step fails clearly</td><td>Can loop indefinitely or go off-track</td></tr>
+        <tr><td>Best for</td><td>Well-defined, stable pipelines</td><td>Open-ended tasks, exploration</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Use an agent only when the task is genuinely open-ended and chaining cannot handle it.
+      Most production problems are solved by chains.
+    </p>
+  </section>
+
+  <section id="react">
+    <h2>The ReAct pattern: Reason → Act → Observe → Repeat</h2>
+    <p>
+      The dominant pattern for agentic loops is <strong>ReAct</strong> (Reasoning + Acting),
+      introduced in a 2022 research paper. The model alternates between:
+    </p>
+    <ol>
+      <li><strong>Reason</strong> — the model thinks about what to do next (often done internally; with chain-of-thought prompting you can make it explicit)</li>
+      <li><strong>Act</strong> — the model calls a tool or produces a final answer</li>
+      <li><strong>Observe</strong> — the tool result is returned to the model as a message</li>
+      <li><strong>Repeat</strong> — the model reasons again given the new information</li>
+    </ol>
+    <p>
+      The loop exits when the model produces a response without a tool call — that is the
+      model signalling "I have enough information, here is my answer."
+    </p>
+    <pre><code>Iteration 1:
+  Reason: "I need to know the current date to answer."
+  Act:    tool_call get_current_date()
+  Observe: "2026-06-24"
+
+Iteration 2:
+  Reason: "Now I need to search for recent EV market data."
+  Act:    tool_call search_web("EV battery market size 2026")
+  Observe: "[search results...]"
+
+Iteration 3:
+  Reason: "I have enough information. I'll synthesise and answer."
+  Act:    (no tool call — final text response)
+  → Loop exits</code></pre>
+  </section>
+
+  <section id="implementing-agent">
+    <h2>Implementing a ReAct agent</h2>
+    <p>
+      The implementation is an extension of the tool calling pattern from Lesson 12 — the
+      main addition is the loop and the stopping conditions:
+    </p>
+    <pre><code>import json
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+MAX_ITERATIONS = 10   # safety limit
+
+def run_agent(goal: str, tools: list, execute_tool_fn) -> str:
+    """
+    Run a ReAct agent until it produces a final answer or hits the iteration limit.
+
+    Args:
+        goal: the user's task in plain English
+        tools: list of tool definitions (JSON Schema format)
+        execute_tool_fn: callable(tool_call) → str
+    """
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a helpful agent. Use the tools available to accomplish the user's goal. "
+                "When you have gathered enough information, produce a final answer without calling any tools."
+            ),
+        },
+        {"role": "user", "content": goal},
+    ]
+
+    for iteration in range(MAX_ITERATIONS):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=tools,
+        )
+        msg = response.choices[0].message
+
+        # Stopping condition: no tool calls = final answer
+        if not msg.tool_calls:
+            return msg.content
+
+        # Execute all requested tools and collect results
+        messages.append(msg)
+        for tool_call in msg.tool_calls:
+            result = execute_tool_fn(tool_call)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": result,
+            })
+
+    # Iteration limit reached — return whatever the model says now
+    final = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages + [{
+            "role": "user",
+            "content": "You have reached the iteration limit. Summarise what you found so far."
+        }],
+    )
+    return f"[Iteration limit reached]\n{final.choices[0].message.content}"</code></pre>
+  </section>
+
+  <section id="stopping-conditions">
+    <h2>Stopping conditions and safety</h2>
+    <p>
+      An agent without stopping conditions is a bug waiting to happen. In the worst case, a
+      misbehaving agent loops indefinitely, making hundreds of API calls and costing hundreds
+      of dollars. Production agents always enforce multiple stopping conditions:
+    </p>
+
+    <h3>1. Maximum iterations</h3>
+    <p>
+      The simplest safety: count iterations and stop after N. Most tasks complete in 3–5
+      iterations. Set your limit at 10–15 and treat hitting it as an error condition to
+      log and investigate.
+    </p>
+
+    <h3>2. Maximum cost</h3>
+    <p>
+      Track token usage across all iterations. If accumulated cost exceeds a per-run budget,
+      abort and surface the partial result. At <code>gpt-4o-mini</code> prices this is rarely
+      needed for a single agent — but it matters for orchestrators running many agents.
+    </p>
+    <pre><code>total_tokens = 0
+MAX_TOKENS = 50_000
+
+# In the loop:
+total_tokens += response.usage.total_tokens
+if total_tokens > MAX_TOKENS:
+    return "[Budget exceeded]"</code></pre>
+
+    <h3>3. Timeout</h3>
+    <p>
+      For user-facing agents, a hard wall-clock timeout prevents the user waiting indefinitely:
+    </p>
+    <pre><code>import time
+start = time.time()
+MAX_SECONDS = 60
+
+# In the loop:
+if time.time() - start > MAX_SECONDS:
+    return "[Timeout]"</code></pre>
+
+    <h3>4. Tool execution sandboxing</h3>
+    <p>
+      If you give an agent a <code>run_python(code)</code> tool, the code it runs can do
+      anything your process can do — delete files, make network calls, exfiltrate data. Tools
+      that execute arbitrary code must run in a sandboxed subprocess or container with
+      restricted permissions. Never give an agent unrestricted code execution in production.
+    </p>
+  </section>
+
+  <section id="when-not-agent">
+    <h2>When NOT to use an agent</h2>
+    <p>
+      The allure of agents is strong — they feel like the most "AI" thing you can build. But
+      they carry real costs:
+    </p>
+    <ul>
+      <li><strong>Unpredictable latency:</strong> 3 iterations = 3–15 seconds; 10 iterations = 10–50 seconds</li>
+      <li><strong>Compounding errors:</strong> a bad decision in iteration 2 poisons iterations 3–10</li>
+      <li><strong>Hard to test:</strong> non-deterministic sequences are difficult to write assertions for</li>
+      <li><strong>Hard to debug:</strong> "why did it call that tool four times?" requires inspecting full message history</li>
+    </ul>
+    <p>
+      Replace an agent with a chain whenever the sequence of steps is predictable. Reserve
+      agents for tasks that are genuinely open-ended — where the right sequence of steps
+      cannot be known until the task is partially done.
+    </p>
+    <div class="callout warn">
+      <strong>Rule of thumb:</strong> If you can write the steps on a whiteboard before running
+      the code, use a chain. If you genuinely cannot predict the steps because they depend on
+      what the model discovers along the way, use an agent.
+    </div>
+  </section>
+
+  <div class="assignment">
+    <h2>Assignment</h2>
+    <ol>
+      <li>
+        <strong>Read:</strong> <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents</a> (Anthropic Engineering blog) — full article, about 20 minutes.
+        <span class="why">The most practically useful article on agent architecture from a team that ships agents in production. Covers when agents are appropriate, how to design tool sets, and the failure modes to anticipate. Everything in this lesson is expanded here with real examples.</span>
+      </li>
+      <li>
+        <strong>Do:</strong> Build a research agent that answers multi-hop questions.
+        <p>A multi-hop question requires chaining multiple information lookups — e.g. "Who is the CEO of the company that makes the iPhone, and what did they say at their last earnings call?" You need fact 1 to know what to search for to get fact 2.</p>
+        <ol>
+          <li>Use the <code>run_agent()</code> function from this lesson as the core loop</li>
+          <li>Give it three tools: <code>search_web(query)</code> (mock or real with Tavily/DuckDuckGo), <code>calculate(expression)</code>, <code>get_current_date()</code></li>
+          <li>Test with three multi-hop questions of increasing complexity</li>
+          <li>Log each iteration: print iteration number, which tool was called, and the result length</li>
+          <li>Verify the iteration limit triggers correctly by setting it to 2 and asking a complex question</li>
+        </ol>
+        <strong>Expected output:</strong> A final answer to each question, plus an iteration log showing the model's reasoning path.
+        <span class="why">Seeing the iteration log is the most educational part — it shows you exactly how the model reasons through a multi-step problem, which builds intuition for when agents help vs hurt.</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="knowledge-check">
+    <h2>Knowledge Check</h2>
+    <p class="kc-intro">Answer from memory, then click to reveal.</p>
+    <ul>
+      <li>
+        <details>
+          <summary>What is the stopping condition in a ReAct agent loop?</summary>
+          <div class="answer">
+            When the model's response contains no tool calls — <code>message.tool_calls</code>
+            is empty or None. This signals that the model has gathered enough information and
+            is ready to produce a final answer. The loop exits and returns
+            <code>message.content</code>.
+            <br><a href="#react">→ The ReAct pattern</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>Name three safety mechanisms every production agent should have.</summary>
+          <div class="answer">
+            Any three of: maximum iteration count, maximum token/cost budget per run, wall-clock
+            timeout, tool execution sandboxing (especially for code execution tools). These
+            prevent runaway loops and limit the blast radius of agent misbehaviour.
+            <br><a href="#stopping-conditions">→ Stopping conditions and safety</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>When should you use a chain instead of an agent?</summary>
+          <div class="answer">
+            When you can predict the sequence of steps before running the code. If you can write
+            the steps on a whiteboard — extract → assess → summarise — use a chain. Use an
+            agent only when the steps depend on what the model discovers along the way and cannot
+            be determined in advance.
+            <br><a href="#when-not-agent">→ When NOT to use an agent</a>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </div>
+
+  <div class="additional-resources">
+    <h2>Additional Resources</h2>
+    <ul>
+      <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener">LLM Powered Autonomous Agents</a> (Lilian Weng) — deep technical background on the ReAct paper, memory systems, and planning approaches</li>
+    </ul>
+  </div>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Questions? Type in the prompt to ask your teacher.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="0012-tool-calling.html">Tool calling</a>
+    <a class="next" href="0014-evaluator-router.html">Evaluator-optimizer and routers</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('0013-agentic-loops');
+  initThemeToggle();
+</script>
+</body>
+</html>

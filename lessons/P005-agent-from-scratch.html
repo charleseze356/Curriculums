@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project: Build an agent from scratch — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 2: AI System Design
+    <span>›</span>
+    Project 5
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 2 · Project 5 <span class="project-badge">Project</span></p>
+    <h1>Build a research agent from scratch — no framework</h1>
+    <p class="lesson-desc">Estimated time: 2–3 hours</p>
+  </header>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      You have built the <code>Agent</code> class in Lesson 17. Now you will build a
+      real research agent on top of it that can answer multi-hop questions requiring
+      several chained searches and calculations. The agent must use the raw OpenAI SDK only
+      — no LangChain, LangGraph, or PydanticAI.
+    </p>
+    <p>
+      A <strong>multi-hop question</strong> is one that requires chaining lookups — you need
+      the answer to step 1 to know what to search for in step 2. Example: "Who is the CEO
+      of the company that makes the Vision Pro, and how long have they held that role?"
+    </p>
+  </section>
+
+  <section id="prerequisites">
+    <div class="learning-outcomes">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0017-agents-from-scratch.html">Lesson 17</a>: the Agent class — use it as your starting point</li>
+        <li><a href="0013-agentic-loops.html">Lesson 13</a>: agentic loops — multi-hop reasoning is the primary use case</li>
+        <li><a href="0012-tool-calling.html">Lesson 12</a>: tool calling — each tool must define a proper JSON Schema</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="spec">
+    <h2>Specification</h2>
+
+    <h3>Tools to implement</h3>
+    <p>Your agent must have at least these five tools:</p>
+    <ol>
+      <li><strong><code>search_web(query: str) → str</code></strong> — Use either <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> (free tier available) or a DuckDuckGo scraper. If using a mock, return plausible static results but note it clearly in the output.</li>
+      <li><strong><code>get_current_date() → str</code></strong> — Returns today's date in ISO format.</li>
+      <li><strong><code>calculate(expression: str) → str</code></strong> — Evaluates safe arithmetic.</li>
+      <li><strong><code>summarise_content(content: str, focus: str) → str</code></strong> — An LLM call that distils a long search result down to the key facts relevant to <code>focus</code>. This is a "sub-call" tool — the agent calls a second LLM to process content before continuing.</li>
+      <li><strong><code>check_fact(claim: str, context: str) → str</code></strong> — An LLM call that checks whether a specific claim is supported by the provided context. Returns "supported", "unsupported", or "uncertain" with a one-sentence explanation.</li>
+    </ol>
+
+    <h3>Test questions</h3>
+    <p>Your agent must correctly answer all four of these (or similar questions of equal complexity):</p>
+    <ol>
+      <li>"What is today's date, and what day of the week is it?"</li>
+      <li>"If a $5,000 investment grows at 8% per year, how much will it be worth in 15 years? Show the calculation."</li>
+      <li>"Who founded OpenAI, and in what year? What is the current CEO's name?"</li>
+      <li>"What is the current version of Python, and when was it released?"</li>
+    </ol>
+    <p>
+      For questions 3 and 4: if using a mock search tool, write mock results that contain the
+      correct information. The point is to verify the agent reasons through multi-step lookups
+      correctly — not to have a live internet connection.
+    </p>
+
+    <h3>Iteration logging</h3>
+    <p>
+      For each run, print a log in this format:
+    </p>
+    <pre><code>--- Question 3 ---
+[Iter 1] Tool: search_web(query="OpenAI founders") → 412 chars
+[Iter 2] Tool: summarise_content(content=..., focus="founders") → 89 chars
+[Iter 3] Tool: search_web(query="OpenAI current CEO 2026") → 387 chars
+[Iter 4] Final answer (no tool call)
+Answer: OpenAI was founded in 2015 by Sam Altman, Greg Brockman, Ilya Sutskever...
+Tokens: 2,847 | Iterations: 4</code></pre>
+  </section>
+
+  <section id="requirements">
+    <h2>Requirements</h2>
+    <ul>
+      <li>Use only the <code>Agent</code> / <code>Tool</code> classes from Lesson 17 (with any additions you need)</li>
+      <li>No LangChain, LangGraph, or PydanticAI</li>
+      <li>All five tools must be present and actually callable (not commented out)</li>
+      <li><code>summarise_content</code> and <code>check_fact</code> must make a real second LLM call (not just return the input unchanged)</li>
+      <li>Verbose logging must show tool name, truncated arguments, and result length for each iteration</li>
+      <li>Iteration limit: 10; timeout: 60s; token budget: 30,000 per run</li>
+      <li>If the iteration limit is hit, print the partial answer with a clear warning</li>
+    </ul>
+  </section>
+
+  <section id="build-order">
+    <h2>Suggested build order</h2>
+    <ol>
+      <li>Copy the <code>Agent</code> and <code>Tool</code> classes from Lesson 17.</li>
+      <li>Implement and test each tool individually (call them directly as Python functions first).</li>
+      <li>Register all five tools, wire up the agent, and run test question 1 (date + day of week — simplest).</li>
+      <li>Run test question 2 (calculation — tests multi-step arithmetic reasoning).</li>
+      <li>Run test question 3 (multi-hop search + summarise — tests the sub-call tool).</li>
+      <li>Run test question 4 (multi-hop — tests chained lookup).</li>
+      <li>Add iteration logging in the format above.</li>
+      <li>Verify the iteration limit triggers correctly by temporarily reducing <code>max_iterations=2</code> and running question 3.</li>
+    </ol>
+  </section>
+
+  <section id="checklist">
+    <h2>Completion checklist</h2>
+    <ul>
+      <li><label><input type="checkbox"> All five tools are implemented and reachable by the agent</label></li>
+      <li><label><input type="checkbox"> <code>summarise_content</code> and <code>check_fact</code> make a second LLM call</label></li>
+      <li><label><input type="checkbox"> All four test questions produce a correct answer</label></li>
+      <li><label><input type="checkbox"> Iteration log prints for every run</label></li>
+      <li><label><input type="checkbox"> Setting <code>max_iterations=2</code> triggers the abort path correctly</label></li>
+      <li><label><input type="checkbox"> Token count prints at the end of each run</label></li>
+    </ul>
+  </section>
+
+  <section id="extensions">
+    <h2>Extension challenges</h2>
+    <ul>
+      <li><strong>Real web search:</strong> Integrate the Tavily API or DuckDuckGo so your agent can answer questions about real current events.</li>
+      <li><strong>Confidence score:</strong> After the agent produces its final answer, run a separate <code>check_fact</code> call that verifies each factual claim and produces a confidence summary.</li>
+      <li><strong>Cost tracking:</strong> Log the estimated cost of each run (based on input/output token counts and model pricing) to a JSONL file.</li>
+      <li><strong>Conversational mode:</strong> Extend to <code>ConversationalAgent</code> from Lesson 17 and maintain history across five sequential questions.</li>
+    </ul>
+  </section>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Stuck? Ask your teacher — type in the prompt.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="0017-agents-from-scratch.html">Building agents from scratch</a>
+    <a class="next" href="P006-ch2-research-assistant.html">Chapter Project: Automated research assistant</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('P005-agent-from-scratch');
+  initThemeToggle();
+</script>
+</body>
+</html>

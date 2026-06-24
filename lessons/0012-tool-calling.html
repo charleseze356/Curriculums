@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool calling — giving your LLM hands — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 2: AI System Design
+    <span>›</span>
+    Lesson 12
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 2 · Lesson 12</p>
+    <h1>Tool calling — giving your LLM hands</h1>
+    <p class="lesson-desc">35–45 min read · Hands-on coding</p>
+  </header>
+
+  <section id="motivation">
+    <h2>Motivation</h2>
+    <p>
+      So far, LLMs in this curriculum have only talked — they read text and produced text. But
+      most real tasks require doing: look up a customer's order, search the web, run a
+      calculation, write a file. Tool calling is the API feature that gives an LLM the ability
+      to take actions in the world — or more precisely, to tell your code what actions to take
+      on its behalf.
+    </p>
+    <p>
+      Tool calling is the foundation of every agent you will ever build. Understanding how it
+      works at the API level — not just how a framework wraps it — is one of the most important
+      skills in this curriculum.
+    </p>
+  </section>
+
+  <section id="prerequisites">
+    <div class="learning-outcomes">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../lessons/0002-openai-api-basics.html">Lesson 2</a>: the messages list, reading responses</li>
+        <li><a href="../lessons/0003-chat-and-history.html">Lesson 3</a>: appending messages to history — tool calling extends this pattern</li>
+        <li><a href="../lessons/0004-structured-outputs.html">Lesson 4</a>: Pydantic models — tool arguments use the same schema approach</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How tool calling works</h2>
+    <p>
+      The key insight: the LLM never executes a tool. It cannot — it has no access to your
+      filesystem, your database, or the internet. What it does is <em>decide</em> which tool
+      to call and with what arguments, then tells you. Your code reads that decision, executes
+      the real function, and sends the result back so the model can continue.
+    </p>
+    <p>
+      The two-phase exchange looks like this:
+    </p>
+    <pre><code>Phase 1: You → API
+  messages: [{"role": "user", "content": "What's the weather in Paris?"}]
+  tools: [definition of get_weather function]
+
+Phase 1: API → You
+  message.tool_calls: [{"name": "get_weather", "arguments": {"city": "Paris"}}]
+  (no text reply yet — the model is waiting for the tool result)
+
+Your code: actually call get_weather("Paris") → "15°C, partly cloudy"
+
+Phase 2: You → API
+  messages: [original messages] + [tool call message] + [tool result message]
+
+Phase 2: API → You
+  message.content: "The weather in Paris is currently 15°C and partly cloudy."</code></pre>
+
+    <p>
+      This two-phase pattern is the foundation of every agent in this curriculum.
+    </p>
+  </section>
+
+  <section id="defining-tools">
+    <h2>Defining tools</h2>
+    <p>
+      Tools are described to the API as JSON Schema objects — a specification of the function's
+      name, description, and parameters. The description is critical: it tells the model when
+      and why to use the tool.
+    </p>
+    <pre><code>tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city. Call this when the user asks about weather conditions.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "The city name, e.g. 'Paris' or 'New York'"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "Temperature unit. Default to celsius unless asked otherwise."
+                    }
+                },
+                "required": ["city"]
+            }
+        }
+    }
+]</code></pre>
+    <p>
+      The <code>"required"</code> list tells the model which parameters it must always provide.
+      Optional parameters (like <code>unit</code> above) can be omitted and you handle the
+      default in your code.
+    </p>
+
+    <h3>Generating tool definitions from Pydantic</h3>
+    <p>
+      Writing JSON Schema by hand is tedious and error-prone. The <code>openai</code> package
+      provides a helper that generates a tool definition from a Pydantic model — the same
+      pattern you already know:
+    </p>
+    <pre><code>from pydantic import BaseModel, Field
+from openai.lib._pydantic import to_strict_json_schema
+import openai
+
+class GetWeatherArgs(BaseModel):
+    city: str = Field(description="The city name, e.g. 'Paris'")
+    unit: str = Field(default="celsius", description="Temperature unit: celsius or fahrenheit")
+
+# openai SDK helper (v1.x):
+tool = openai.pydantic_function_tool(GetWeatherArgs, name="get_weather",
+    description="Get current weather for a city.")</code></pre>
+    <p>
+      <code>pydantic_function_tool()</code> produces a correctly formatted tool definition
+      from the Pydantic model's schema. Use this approach — it is less error-prone than
+      writing the schema by hand.
+    </p>
+  </section>
+
+  <section id="making-the-call">
+    <h2>Making the tool-enabled API call</h2>
+    <p>
+      Pass the tools list to <code>client.chat.completions.create()</code> as the
+      <code>tools</code> parameter:
+    </p>
+    <pre><code>response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+    tools=tools,
+)</code></pre>
+    <p>
+      The model responds in one of two ways:
+    </p>
+    <ul>
+      <li><strong>Tool call:</strong> <code>response.choices[0].message.tool_calls</code> is a non-empty list — the model wants you to run a tool</li>
+      <li><strong>Direct reply:</strong> <code>response.choices[0].message.content</code> is a string — the model answered without needing a tool</li>
+    </ul>
+    <pre><code>message = response.choices[0].message
+
+if message.tool_calls:
+    tool_call = message.tool_calls[0]
+    print(f"Model wants to call: {tool_call.function.name}")
+    print(f"With args: {tool_call.function.arguments}")  # JSON string
+else:
+    print(f"Direct reply: {message.content}")</code></pre>
+  </section>
+
+  <section id="executing-tools">
+    <h2>Executing the tool and returning the result</h2>
+    <p>
+      When <code>message.tool_calls</code> is not empty, your code executes the function and
+      sends the result back in a second API call. Three messages are added to the history:
+    </p>
+    <ol>
+      <li>The assistant message that contains the tool call (from phase 1)</li>
+      <li>A <code>"tool"</code> role message with the result</li>
+    </ol>
+    <pre><code>import json
+
+def execute_tool(tool_call) -> str:
+    """Dispatch to the right function and return its result as a string."""
+    name = tool_call.function.name
+    args = json.loads(tool_call.function.arguments)
+
+    if name == "get_weather":
+        return get_weather(**args)   # your real function
+    raise ValueError(f"Unknown tool: {name}")
+
+# Full two-phase exchange:
+messages = [{"role": "user", "content": "What's the weather in Paris?"}]
+
+# Phase 1
+response = client.chat.completions.create(
+    model="gpt-4o-mini", messages=messages, tools=tools
+)
+assistant_message = response.choices[0].message
+
+if assistant_message.tool_calls:
+    tool_call = assistant_message.tool_calls[0]
+    result = execute_tool(tool_call)
+
+    # Append phase 1 result to history
+    messages.append(assistant_message)      # the tool-call decision
+    messages.append({
+        "role": "tool",
+        "tool_call_id": tool_call.id,
+        "content": result,                  # the result string
+    })
+
+    # Phase 2 — model sees the result and produces a reply
+    final_response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=messages, tools=tools
+    )
+    print(final_response.choices[0].message.content)
+else:
+    print(assistant_message.content)</code></pre>
+    <p>
+      The <code>tool_call_id</code> in the tool result message ties it back to the specific
+      tool call from phase 1. This matters when the model calls multiple tools at once
+      (parallel tool calling — covered next).
+    </p>
+  </section>
+
+  <section id="parallel-tool-calls">
+    <h2>Parallel tool calls</h2>
+    <p>
+      The model can request multiple tool calls in a single response — for example, asking for
+      the weather in both Paris and Tokyo at the same time. When this happens,
+      <code>message.tool_calls</code> contains more than one item.
+    </p>
+    <p>
+      Execute all tool calls (in parallel if you like) and add one <code>"tool"</code> message
+      per call, matching each by <code>tool_call_id</code>:
+    </p>
+    <pre><code>if assistant_message.tool_calls:
+    messages.append(assistant_message)
+
+    # Execute all requested tool calls
+    for tool_call in assistant_message.tool_calls:
+        result = execute_tool(tool_call)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": result,
+        })
+
+    # Phase 2 with all results
+    final_response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=messages, tools=tools
+    )
+    print(final_response.choices[0].message.content)</code></pre>
+  </section>
+
+  <section id="complete-example">
+    <h2>Complete example: a research assistant with tools</h2>
+    <p>
+      Here is a complete, runnable assistant with three tools — web search (mocked), calculator,
+      and current date. The <code>execute_tool</code> dispatcher pattern scales cleanly:
+    </p>
+    <pre><code>import json
+import os
+import datetime
+from dotenv import load_dotenv
+from openai import OpenAI
+import openai
+from pydantic import BaseModel, Field
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# ── Tool implementations ──────────────────────────────────────
+def search_web(query: str) -> str:
+    # In production: call Tavily, Serper, or similar
+    return f"[Mock search results for '{query}': No real results in this demo]"
+
+def calculate(expression: str) -> str:
+    try:
+        result = eval(expression, {"__builtins__": {}})
+        return str(result)
+    except Exception as e:
+        return f"Error: {e}"
+
+def get_current_date() -> str:
+    return datetime.date.today().isoformat()
+
+# ── Tool argument schemas ─────────────────────────────────────
+class SearchArgs(BaseModel):
+    query: str = Field(description="The search query")
+
+class CalculateArgs(BaseModel):
+    expression: str = Field(description="A safe arithmetic expression, e.g. '2 + 2 * 10'")
+
+# ── Tool registry ─────────────────────────────────────────────
+TOOLS = [
+    openai.pydantic_function_tool(SearchArgs, name="search_web",
+        description="Search the web for current information."),
+    openai.pydantic_function_tool(CalculateArgs, name="calculate",
+        description="Evaluate an arithmetic expression. Use for any maths."),
+    {"type": "function", "function": {
+        "name": "get_current_date",
+        "description": "Get today's date in ISO format.",
+        "parameters": {"type": "object", "properties": {}, "required": []}
+    }},
+]
+
+def execute_tool(tool_call) -> str:
+    name = tool_call.function.name
+    args = json.loads(tool_call.function.arguments)
+    if name == "search_web":   return search_web(**args)
+    if name == "calculate":    return calculate(**args)
+    if name == "get_current_date": return get_current_date()
+    raise ValueError(f"Unknown tool: {name}")
+
+def ask(question: str) -> str:
+    messages = [
+        {"role": "system", "content": "You are a helpful research assistant. Use tools when needed."},
+        {"role": "user",   "content": question},
+    ]
+    while True:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=TOOLS
+        )
+        msg = response.choices[0].message
+        if not msg.tool_calls:
+            return msg.content      # final answer
+
+        # Execute all requested tools
+        messages.append(msg)
+        for tc in msg.tool_calls:
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tc.id,
+                "content": execute_tool(tc),
+            })
+        # Loop back — model will incorporate results and may call more tools
+
+if __name__ == "__main__":
+    print(ask("What is 1234 * 5678, and what is today's date?"))</code></pre>
+    <p>
+      The <code>while True</code> loop is the beginning of an agentic loop — the model can
+      call as many tools as needed before producing a final answer. Lesson 13 formalises this
+      pattern and adds the safety controls it needs in production.
+    </p>
+  </section>
+
+  <div class="assignment">
+    <h2>Assignment</h2>
+    <ol>
+      <li>
+        <strong>Read:</strong> <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents</a> (Anthropic) — read only the "Tool Use" section (about 10 minutes).
+        <span class="why">Anthropic's production perspective on tool design: how to write good tool descriptions, how to scope tools so the model uses them correctly, and common tool design mistakes. Directly applicable to the project below.</span>
+      </li>
+      <li>
+        <strong>Do:</strong> Add real tool calling to your CLI assistant from Project 1.
+        <ol>
+          <li>Define three tools using Pydantic schemas: <code>get_current_datetime()</code>, <code>calculate(expression)</code>, and <code>read_file(path)</code> (reads a file from disk and returns its content)</li>
+          <li>Implement the two-phase tool loop in the assistant's <code>complete()</code> method</li>
+          <li>Test: ask "What time is it?", "What is 17 * 83?", and "Read the contents of my .env.example file"</li>
+          <li>Make sure the loop handles parallel tool calls (model requests two at once)</li>
+        </ol>
+        <strong>Expected output:</strong> The assistant accurately answers all three questions using its tools.
+        <span class="why">Adding tools to an existing assistant reinforces the two-phase pattern, and reading files is a real capability that makes your assistant genuinely useful.</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="knowledge-check">
+    <h2>Knowledge Check</h2>
+    <p class="kc-intro">Answer from memory, then click to reveal.</p>
+    <ul>
+      <li>
+        <details>
+          <summary>Does the LLM execute tools itself? Explain what actually happens.</summary>
+          <div class="answer">
+            No. The LLM has no access to your filesystem, network, or anything outside the API.
+            It only decides which tool to call and what arguments to use, then tells your code
+            via <code>message.tool_calls</code>. Your code executes the real function and sends
+            the result back in a second API call. The LLM only sees the result as a message.
+            <br><a href="#how-it-works">→ How tool calling works</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>What two messages do you append to the conversation after executing a tool call?</summary>
+          <div class="answer">
+            1. The assistant message that contained the tool call — the full <code>message</code>
+            object from phase 1. 2. A <code>"tool"</code> role message with the
+            <code>tool_call_id</code> and the result string. The ID ties the result back to
+            the specific tool call request.
+            <br><a href="#executing-tools">→ Executing the tool and returning the result</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>Why is the tool description more important than the parameter schema?</summary>
+          <div class="answer">
+            The model uses the description to decide when and why to call the tool. A vague
+            description ("get data") will cause the model to use the tool at the wrong time or
+            not at all. The parameter schema tells it what to pass, but the description tells
+            it whether to call it in the first place. Good descriptions include the trigger
+            condition: "Call this when the user asks about…"
+            <br><a href="#defining-tools">→ Defining tools</a>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </div>
+
+  <div class="additional-resources">
+    <h2>Additional Resources</h2>
+    <ul>
+      <li><a href="https://platform.openai.com/docs/guides/function-calling" target="_blank" rel="noopener">OpenAI: Function calling guide</a> — full reference including <code>tool_choice</code> forcing, strict mode, and structured outputs with tools</li>
+      <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use" target="_blank" rel="noopener">Anthropic: Tool use</a> — Claude's tool calling API; the request/response format differs from OpenAI's but the concept is identical</li>
+    </ul>
+  </div>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Questions? Type in the prompt to ask your teacher.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="0011-llm-chaining.html">LLM chaining</a>
+    <a class="next" href="0013-agentic-loops.html">Agentic loops</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('0012-tool-calling');
+  initThemeToggle();
+</script>
+</body>
+</html>
