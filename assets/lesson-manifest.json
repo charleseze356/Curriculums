@@ -1,0 +1,68 @@
+{
+  "chapters": [
+    {
+      "id": "ch1",
+      "number": 1,
+      "title": "Foundations of AI Engineering",
+      "goal": "Set up a professional AI dev environment, call LLM APIs confidently, and write prompts that produce reliable, structured outputs.",
+      "topics": [
+        {
+          "id": "ch1-foundations",
+          "title": "Getting started",
+          "items": [
+            { "id": "0001", "type": "lesson",          "title": "Setting up your AI engineering environment",           "file": "lessons/0001-ai-dev-environment.html" },
+            { "id": "0002", "type": "lesson",          "title": "Your first LLM API call — how OpenAI works",           "file": "lessons/0002-openai-api-basics.html" },
+            { "id": "0003", "type": "lesson",          "title": "Conversations and chat history",                       "file": "lessons/0003-chat-and-history.html" },
+            { "id": "0004", "type": "lesson",          "title": "Structured outputs and function calling",              "file": "lessons/0004-structured-outputs.html" },
+            { "id": "P001", "type": "project",         "title": "Build a CLI AI assistant",                             "file": "lessons/P001-cli-assistant.html" },
+            { "id": "0005", "type": "lesson",          "title": "Prompt engineering fundamentals",                      "file": "lessons/0005-prompt-engineering.html" },
+            { "id": "0006", "type": "lesson",          "title": "Advanced prompting — tokens, cost, and reliability",   "file": "lessons/0006-advanced-prompting.html" },
+            { "id": "P002", "type": "project",         "title": "Build a document summarizer",                          "file": "lessons/P002-document-summarizer.html" },
+            { "id": "0007", "type": "lesson",          "title": "The Anthropic API — Claude and how it differs",        "file": "lessons/0007-anthropic-api.html" },
+            { "id": "P003", "type": "chapter-project", "title": "Multi-model AI assistant with structured output",      "file": "lessons/P003-ch1-multi-model-assistant.html" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ch2",
+      "number": 2,
+      "title": "AI System Design",
+      "goal": "Design LLM-based systems end-to-end and implement any pattern — with or without a framework.",
+      "topics": [],
+      "status": "planned"
+    },
+    {
+      "id": "ch3",
+      "number": 3,
+      "title": "Production AI Backends",
+      "goal": "Build a scalable backend that exposes AI capabilities via a clean API, runs in Docker, and persists data.",
+      "topics": [],
+      "status": "planned"
+    },
+    {
+      "id": "ch4",
+      "number": 4,
+      "title": "RAG & Vector Search",
+      "goal": "Build a production RAG pipeline that connects an LLM to custom data, with measurable retrieval quality.",
+      "topics": [],
+      "status": "planned"
+    },
+    {
+      "id": "ch5",
+      "number": 5,
+      "title": "Monitoring & Evaluation",
+      "goal": "Measure, track, and improve the quality, cost, and reliability of a live AI system.",
+      "topics": [],
+      "status": "planned"
+    },
+    {
+      "id": "ch6",
+      "number": 6,
+      "title": "Deployment & Production",
+      "goal": "Deploy, monitor, and maintain an AI application in a real production environment.",
+      "topics": [],
+      "status": "planned"
+    }
+  ]
+}

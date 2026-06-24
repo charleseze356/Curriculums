@@ -1,0 +1,529 @@
+/* AI Engineering Curriculum — shared lesson stylesheet
+   Tufte-inspired: readable, print-friendly, returns well for review. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --text:           #1a1a1a;
+  --text-muted:     #4b5563;
+  --text-light:     #9ca3af;
+  --bg:             #ffffff;
+  --bg-alt:         #f9fafb;
+  --bg-code:        #f3f4f6;
+  --accent:         #2563eb;
+  --accent-dark:    #1d4ed8;
+  --success:        #16a34a;
+  --success-bg:     #dcfce7;
+  --warning:        #d97706;
+  --border:         #e5e7eb;
+  --project-fg:     #6d28d9;
+  --project-bg:     #ede9fe;
+  --assignment-bg:  #fffbeb;
+  --assignment-bdr: #fde68a;
+  --font-body:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-ui:        'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:      'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --width-body:     680px;
+  --width-wide:     900px;
+}
+
+/* ── Dark theme ───────────────────────────────────────────────── */
+
+html.dark {
+  --text:           #e2e8f0;
+  --text-muted:     #94a3b8;
+  --text-light:     #64748b;
+  --bg:             #0f1117;
+  --bg-alt:         #161b27;
+  --bg-code:        #1e2435;
+  --accent:         #60a5fa;
+  --accent-dark:    #93c5fd;
+  --success:        #4ade80;
+  --success-bg:     #052e16;
+  --warning:        #fbbf24;
+  --border:         #2d3748;
+  --project-fg:     #a78bfa;
+  --project-bg:     #1e1b4b;
+  --assignment-bg:  #1c1a0e;
+  --assignment-bdr: #6b4f10;
+}
+
+/* ── Theme toggle ─────────────────────────────────────────────── */
+
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.theme-toggle:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* ── Reset & base ─────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text);
+  background: var(--bg);
+  padding: 0 1.5rem;
+}
+
+/* ── Layout ───────────────────────────────────────────────────── */
+
+.lesson-wrapper {
+  max-width: var(--width-body);
+  margin: 0 auto;
+  padding: 3rem 0 6rem;
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────── */
+
+.breadcrumb {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--text-light);
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.02em;
+}
+
+.breadcrumb a {
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb span { margin: 0 0.4em; }
+
+/* ── Lesson header ────────────────────────────────────────────── */
+
+.lesson-header {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.lesson-meta {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-header h1 {
+  font-size: 2rem;
+  font-weight: normal;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+/* ── Typography ───────────────────────────────────────────────── */
+
+h2 {
+  font-size: 1.35rem;
+  font-weight: normal;
+  margin: 2.5rem 0 0.75rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 2rem 0 0.5rem;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 1.25rem;
+}
+
+p:last-child { margin-bottom: 0; }
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover { color: var(--accent-dark); }
+
+ul, ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+li { margin-bottom: 0.35rem; }
+
+strong { font-weight: bold; }
+em { font-style: italic; }
+
+blockquote {
+  border-left: 3px solid var(--border);
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── Code ─────────────────────────────────────────────────────── */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--bg-code);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--text);
+}
+
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  line-height: 1.5;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+/* ── Tables ───────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+th {
+  text-align: left;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* ── Lesson sections ──────────────────────────────────────────── */
+
+.learning-outcomes {
+  background: var(--bg-alt);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.learning-outcomes h2 {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  border: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.learning-outcomes ul { margin-bottom: 0; }
+
+/* ── Assignment section ───────────────────────────────────────── */
+
+.assignment {
+  background: var(--assignment-bg);
+  border: 1px solid var(--assignment-bdr);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  margin: 2.5rem 0;
+}
+
+.assignment h2 {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--warning);
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.assignment ol { margin-bottom: 0; }
+
+.assignment li {
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+
+.assignment li:last-child { margin-bottom: 0; }
+
+.assignment .why {
+  display: block;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+/* ── Knowledge check ──────────────────────────────────────────── */
+
+.knowledge-check {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  margin: 2.5rem 0;
+}
+
+.kc-intro,
+.lesson-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.knowledge-check h2 {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.knowledge-check ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.knowledge-check li { margin-bottom: 0; }
+
+.knowledge-check details {
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 0;
+}
+
+.knowledge-check details:last-child { border-bottom: none; }
+
+.knowledge-check summary {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.knowledge-check summary::before {
+  content: '▸';
+  font-size: 0.75em;
+  color: var(--text-light);
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.knowledge-check details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.knowledge-check .answer {
+  padding: 0.5rem 0 0.25rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ── Additional resources ─────────────────────────────────────── */
+
+.additional-resources {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.additional-resources h2 {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  border: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.additional-resources ul { margin-bottom: 0; }
+
+/* ── Progress / mark-complete ─────────────────────────────────── */
+
+.lesson-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+
+.btn-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 1.25rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-complete:hover { background: var(--accent-dark); }
+
+.btn-complete.completed {
+  background: var(--success);
+  cursor: default;
+}
+
+.btn-complete.completed:hover { background: var(--success); }
+
+/* ── Lesson nav (prev/next) ───────────────────────────────────── */
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+
+.lesson-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.lesson-nav a:hover { color: var(--accent-dark); }
+.lesson-nav .prev::before { content: '←'; }
+.lesson-nav .next::after  { content: '→'; }
+
+/* ── Project badge ────────────────────────────────────────────── */
+
+.project-badge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  border-radius: 3px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.15em 0.55em;
+  vertical-align: middle;
+  margin-left: 0.4em;
+}
+
+.chapter-project-badge {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-color: #c4b5fd;
+}
+
+/* ── Callout boxes ────────────────────────────────────────────── */
+
+.callout {
+  border-left: 3px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--bg-alt);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.95rem;
+}
+
+.callout.info  { border-color: var(--accent); }
+.callout.warn  { border-color: var(--warning); }
+.callout.good  { border-color: var(--success); }
+
+/* ── Print ────────────────────────────────────────────────────── */
+
+@media print {
+  body { background: #fff; padding: 0; font-size: 11pt; }
+  .lesson-wrapper { max-width: 100%; padding: 0; }
+  .lesson-footer, .lesson-nav, .btn-complete { display: none; }
+  a { color: var(--text); }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: var(--text-muted); }
+  pre, code { font-size: 9pt; }
+  h2, h3 { page-break-after: avoid; }
+  .assignment, .knowledge-check { break-inside: avoid; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  html { font-size: 16px; }
+  .lesson-footer { flex-direction: column; align-items: flex-start; }
+}

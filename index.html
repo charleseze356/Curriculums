@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Engineering Curriculum</title>
+  <script>if(localStorage.getItem('ai-curriculum-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --text:        #1a1a1a;
+      --text-muted:  #4b5563;
+      --text-light:  #9ca3af;
+      --bg:          #ffffff;
+      --bg-alt:      #f9fafb;
+      --bg-hover:    #f3f4f6;
+      --border:      #e5e7eb;
+      --accent:      #2563eb;
+      --accent-dark: #1d4ed8;
+      --success:     #16a34a;
+      --success-bg:  #dcfce7;
+      --success-fg:  #15803d;
+      --project-bg:  #ede9fe;
+      --project-fg:  #6d28d9;
+      --lesson-bg:   #dbeafe;
+      --lesson-fg:   #1d4ed8;
+      --font-ui:     'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    html.dark {
+      --text:        #e2e8f0;
+      --text-muted:  #94a3b8;
+      --text-light:  #64748b;
+      --bg:          #0f1117;
+      --bg-alt:      #161b27;
+      --bg-hover:    #1e2435;
+      --border:      #2d3748;
+      --accent:      #60a5fa;
+      --accent-dark: #93c5fd;
+      --success:     #4ade80;
+      --success-bg:  #052e16;
+      --success-fg:  #4ade80;
+      --project-bg:  #1e1b4b;
+      --project-fg:  #a78bfa;
+      --lesson-bg:   #1e3a5f;
+      --lesson-fg:   #60a5fa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-ui);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-alt);
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .theme-toggle:hover { background: var(--bg-hover); color: var(--text); }
+
+    /* ── Site header ── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .site-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .site-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 560px;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap {
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .progress-bar {
+      flex: 1;
+      max-width: 280px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 0;
+      height: 100%;
+      background: var(--success);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    /* ── Main layout ── */
+    .site-body {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ── Chapter card ── */
+    .chapter {
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-alt);
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--font-ui);
+      color: var(--text);
+    }
+
+    .chapter-header:hover { background: var(--bg-hover); }
+
+    .chapter-number {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-light);
+      flex-shrink: 0;
+    }
+
+    .chapter-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .chapter-status {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      flex-shrink: 0;
+    }
+
+    .chapter-chevron {
+      font-size: 0.7rem;
+      color: var(--text-light);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chapter.open .chapter-chevron { transform: rotate(90deg); }
+
+    .chapter-body {
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .chapter.open .chapter-body { display: block; }
+
+    /* ── Chapter goal ── */
+    .chapter-goal {
+      padding: 0.85rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-style: italic;
+    }
+
+    /* ── Topic ── */
+    .topic { border-bottom: 1px solid var(--border); }
+    .topic:last-child { border-bottom: none; }
+
+    .topic-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      padding: 0.7rem 1.25rem 0.35rem;
+    }
+
+    /* ── Item row ── */
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 1.25rem 0.45rem 1.5rem;
+    }
+
+    .item:last-child { padding-bottom: 0.75rem; }
+
+    .item-check {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--success);
+      background: var(--bg);
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .item.done .item-check {
+      border-color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .item-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0.1em 0.5em;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .badge-lesson         { background: var(--lesson-bg); color: var(--lesson-fg); }
+    .badge-project        { background: var(--success-bg); color: var(--success-fg); }
+    .badge-chapter-project{ background: var(--project-bg); color: var(--project-fg); }
+
+    .item-link {
+      font-size: 0.875rem;
+      color: var(--accent);
+      text-decoration: none;
+      flex: 1;
+    }
+
+    .item-link:hover { color: var(--accent-dark); text-decoration: underline; }
+
+    .item.locked .item-link  { color: var(--text-light); pointer-events: none; }
+    .item.locked .item-badge { opacity: 0.4; }
+
+    /* ── Planned chapter ── */
+    .planned-note {
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>AI Engineering Curriculum</h1>
+  <p>A self-paced curriculum to go from Python developer to hireable AI Engineer — built in the spirit of The Odin Project.</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <span id="progress-label">0 of 0 complete</span>
+  </div>
+</header>
+
+<main class="site-body" id="curriculum"></main>
+
+<script type="module">
+  import { getProgress } from './assets/progress.js';
+  import { initThemeToggle } from './assets/theme.js';
+  initThemeToggle();
+
+  const MANIFEST_URL = './assets/lesson-manifest.json';
+
+  async function init() {
+    const manifest = await fetch(MANIFEST_URL).then(r => r.json());
+    const progress  = getProgress();
+
+    const container = document.getElementById('curriculum');
+    let totalItems = 0;
+    let doneItems  = 0;
+
+    manifest.chapters.forEach((chapter, ci) => {
+      const allItems = chapter.topics.flatMap(t => t.items);
+      totalItems += allItems.length;
+      const doneCh = allItems.filter(it => progress[it.id]).length;
+      doneItems  += doneCh;
+
+      const isPlanned = chapter.status === 'planned';
+      const isOpen    = ci === 0; // open first chapter by default
+
+      const el = document.createElement('div');
+      el.className = 'chapter' + (isOpen ? ' open' : '');
+      el.innerHTML = `
+        <button class="chapter-header" aria-expanded="${isOpen}">
+          <span class="chapter-number">Chapter ${chapter.number}</span>
+          <span class="chapter-title">${chapter.title}</span>
+          <span class="chapter-status">${isPlanned ? 'Coming soon' : `${doneCh}/${allItems.length}`}</span>
+          <span class="chapter-chevron">▸</span>
+        </button>
+        <div class="chapter-body">
+          ${chapter.goal ? `<div class="chapter-goal">${chapter.goal}</div>` : ''}
+          ${isPlanned
+            ? `<div class="planned-note">Lessons for this chapter will be added after Chapter ${chapter.number - 1} is complete.</div>`
+            : chapter.topics.map(topic => renderTopic(topic, progress)).join('')
+          }
+        </div>
+      `;
+
+      el.querySelector('.chapter-header').addEventListener('click', () => {
+        el.classList.toggle('open');
+      });
+
+      container.appendChild(el);
+    });
+
+    // Update progress bar
+    const pct = totalItems ? Math.round((doneItems / totalItems) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent =
+      `${doneItems} of ${totalItems} complete`;
+
+    // Re-render on progress change (from lesson tabs)
+    window.addEventListener('progress-change', () => location.reload());
+  }
+
+  function renderTopic(topic, progress) {
+    const rows = topic.items.map(item => {
+      const done   = !!progress[item.id];
+      const badge  = item.type === 'chapter-project' ? 'chapter-project'
+                   : item.type === 'project'         ? 'project'
+                   :                                   'lesson';
+      const label  = badge === 'chapter-project' ? 'Chapter Project'
+                   : badge === 'project'          ? 'Project'
+                   :                               'Lesson';
+      return `
+        <div class="item${done ? ' done' : ''}">
+          <div class="item-check">${done ? '✓' : ''}</div>
+          <span class="item-badge badge-${badge}">${label}</span>
+          <a class="item-link" href="./${item.file}">${item.title}</a>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="topic">
+        <div class="topic-title">${topic.title}</div>
+        ${rows}
+      </div>`;
+  }
+
+  init();
+</script>
+
+</body>
+</html>
