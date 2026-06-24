@@ -45,6 +45,14 @@ Specific aihero.dev articles that reference the Vercel AI SDK:
 - uv documentation — https://docs.astral.sh/uv/ (Additional Resources `0001`)
 - python-dotenv — https://pypi.org/project/python-dotenv/ (Additional Resources `0001`)
 
+### Open models / Ollama / Hugging Face (lesson `0047`)
+- Ollama model library — https://ollama.com/library (Additional Resources `0047`)
+- Ollama on GitHub — https://github.com/ollama/ollama (Additional Resources `0047`)
+- Hugging Face Models — https://huggingface.co/models (Additional Resources `0047`)
+- Transformers quick tour — https://huggingface.co/docs/transformers/quicktour (Additional Resources `0047`)
+- Open LLM Leaderboard Space — https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard (Additional Resources `0047`)
+- **Assignment article used:** Open LLM Leaderboard v2 blog post — https://huggingface.co/blog/open-llm-leaderboard-v2 — **verify this URL is live before publishing** (Assignment `0047`)
+
 ### OpenAI API
 - OpenAI Python SDK — https://github.com/openai/openai-python (Additional Resources `0002`)
 - OpenAI Cookbook — https://cookbook.openai.com/ (Additional Resources across Ch1)

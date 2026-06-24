@@ -19,6 +19,7 @@
             { "id": "0006", "type": "lesson",          "title": "Advanced prompting — tokens, cost, and reliability",   "file": "lessons/0006-advanced-prompting.html" },
             { "id": "P002", "type": "project",         "title": "Build a document summarizer",                          "file": "lessons/P002-document-summarizer.html" },
             { "id": "0007", "type": "lesson",          "title": "The Anthropic API — Claude and how it differs",        "file": "lessons/0007-anthropic-api.html" },
+            { "id": "0047", "type": "lesson",          "title": "Open models — running LLMs without an API key",        "file": "lessons/0047-open-models-ollama-huggingface.html" },
             { "id": "P003", "type": "chapter-project", "title": "Multi-model AI assistant with structured output",      "file": "lessons/P003-ch1-multi-model-assistant.html" }
           ]
         }
