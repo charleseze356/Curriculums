@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker for AI applications — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 3: Production AI Backends
+    <span>›</span>
+    Lesson 21
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 3 · Lesson 21</p>
+    <h1>Docker for AI applications</h1>
+    <p class="lesson-desc">35–45 min read · Hands-on</p>
+  </header>
+
+  <section id="motivation">
+    <h2>Motivation</h2>
+    <p>
+      Your FastAPI AI backend works on your machine. But "works on my machine" is not
+      deployable. When you ship to a cloud server, a different engineer's laptop, or a CI
+      pipeline, Python version mismatches, missing system libraries, and different
+      environment variables will break things in ways that are hard to diagnose.
+    </p>
+    <p>
+      Docker solves this by packaging your application, its exact Python version, all its
+      dependencies, and its configuration into a single portable unit called a
+      <strong>container</strong>. Run the container anywhere — your laptop, a Linux VM in
+      Hetzner, GitHub Actions — and the application behaves identically. Docker is the
+      standard deployment unit for production AI backends, and fluency with it is expected
+      in every AI engineering role.
+    </p>
+  </section>
+
+  <section id="prerequisites">
+    <div class="learning-outcomes">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="P007-ai-rest-api.html">Project 7</a>: A working FastAPI AI backend to containerise</li>
+        <li>Basic command-line comfort — you will run <code>docker</code> commands in your terminal</li>
+        <li>Docker Desktop installed — download from <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">docker.com</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="containers-vs-vms">
+    <h2>Containers vs virtual machines</h2>
+    <p>
+      A <strong>virtual machine</strong> (VM) is a complete simulated computer — it has
+      its own operating system, kernel, and hardware emulation. Starting a VM takes minutes;
+      each VM uses gigabytes of RAM.
+    </p>
+    <p>
+      A <strong>container</strong> is much lighter. It shares the host machine's operating
+      system kernel but runs in an isolated process with its own filesystem, network, and
+      environment variables. Starting a container takes seconds; containers use only the
+      memory your application actually needs.
+    </p>
+    <p>
+      For an AI backend, you typically run two or three containers (your API, a database,
+      maybe a Redis cache) on a single VM. Each container is isolated — the database cannot
+      accidentally see your API's environment variables — but they can communicate over a
+      shared network that Docker creates.
+    </p>
+  </section>
+
+  <section id="dockerfile">
+    <h2>The Dockerfile</h2>
+    <p>
+      A <strong>Dockerfile</strong> is a text file that describes how to build a
+      container image. It is a sequence of instructions that Docker executes in order:
+      start from a base image, copy files, install dependencies, set configuration.
+    </p>
+    <p>
+      Here is a production-ready Dockerfile for the FastAPI backend from Project 7:
+    </p>
+    <pre><code"># Use a specific Python version — never "latest" in production
+FROM python:3.12-slim
+
+# Prevent Python from writing .pyc files (containers don't need them)
+ENV PYTHONDONTWRITEBYTECODE=1
+# Ensure stdout/stderr is flushed immediately (important for log collection)
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy dependency definitions first (take advantage of layer caching)
+COPY pyproject.toml uv.lock ./
+
+# Install uv and use it to install dependencies
+RUN pip install uv && uv sync --frozen --no-dev
+
+# Copy the rest of the application code
+COPY . .
+
+# Document which port the application uses (informational — doesn't actually expose it)
+EXPOSE 8000
+
+# The command to run when the container starts
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+</code></pre>
+
+    <h3>Layer caching: why the order matters</h3>
+    <p>
+      Every <code>RUN</code>, <code>COPY</code>, and <code>ADD</code> instruction creates
+      a <strong>layer</strong> in the image. Docker caches each layer. When you rebuild,
+      it only re-runs instructions where something changed — and everything after them.
+    </p>
+    <p>
+      This is why you copy <code>pyproject.toml</code> and install dependencies
+      <em>before</em> copying your application code. Your dependencies rarely change; your
+      code changes constantly. With this order, a code change only re-runs the last
+      <code>COPY . .</code> step. Reversed, every code change would reinstall all
+      dependencies — slow.
+    </p>
+    <div class="callout info">
+      <strong>The golden rule:</strong> Put the things that change least at the top of the
+      Dockerfile. Put the things that change most (your code) at the bottom.
+    </div>
+  </section>
+
+  <section id="build-run">
+    <h2>Building and running a container</h2>
+    <pre><code"># Build the image, tag it "ai-api"
+docker build -t ai-api .
+
+# Run it, map port 8000 on your machine to port 8000 in the container
+docker run -p 8000:8000 ai-api
+
+# But the container has no .env file — pass env vars at runtime instead:
+docker run -p 8000:8000 \
+  -e OPENAI_API_KEY=sk-... \
+  ai-api
+
+# Run in the background (detached mode)
+docker run -d -p 8000:8000 \
+  -e OPENAI_API_KEY=sk-... \
+  --name my-ai-api \
+  ai-api
+
+# See running containers
+docker ps
+
+# View logs from a running container
+docker logs my-ai-api
+
+# Stop it
+docker stop my-ai-api
+</code></pre>
+
+    <h3>Never bake secrets into images</h3>
+    <p>
+      Do NOT put your API key in the Dockerfile or copy your <code>.env</code> file into
+      the image. Docker images can be pushed to registries (GitHub Packages, Docker Hub,
+      AWS ECR) where others might see them. Always pass secrets at runtime via
+      <code>-e VARNAME=value</code> or, in production, via a secrets manager.
+    </p>
+    <p>
+      Add a <code>.dockerignore</code> file alongside your Dockerfile to prevent sensitive
+      files from being accidentally copied into the image:
+    </p>
+    <pre><code">.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+tests/
+*.md
+</code></pre>
+  </section>
+
+  <section id="docker-compose">
+    <h2>Docker Compose — running multiple containers together</h2>
+    <p>
+      An AI backend rarely runs alone. It needs a database, maybe a cache, maybe a
+      background worker. Running and connecting these individually with <code>docker run</code>
+      becomes unwieldy. <strong>Docker Compose</strong> lets you define all your services
+      in a single YAML file and start everything with one command.
+    </p>
+    <p>
+      Here is a <code>docker-compose.yml</code> for the AI backend plus a PostgreSQL
+      database (which you will use in Lesson 22):
+    </p>
+    <pre><code">services:
+  api:
+    build: .                   # build from the Dockerfile in the current directory
+    ports:
+      - "8000:8000"            # host:container port mapping
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}   # read from host .env file
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/aidb
+    depends_on:
+      db:
+        condition: service_healthy         # wait for postgres to be ready
+    volumes:
+      - .:/app                 # mount current directory for hot reload in dev
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:16-alpine              # official postgres image, slim variant
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: aidb
+    ports:
+      - "5432:5432"                        # expose for local tools (e.g. psql, pgAdmin)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # persist data between restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:               # named volume — survives container restarts
+</code></pre>
+
+    <p>Start everything:</p>
+    <pre><code"># Start all services in the background
+docker compose up -d
+
+# Watch logs from all services
+docker compose logs -f
+
+# Stop everything
+docker compose down
+
+# Stop and delete the database volume (fresh start)
+docker compose down -v
+</code></pre>
+
+    <h3>Service networking in Compose</h3>
+    <p>
+      Compose puts all services on a shared network automatically. The hostname of each
+      service is its name in the YAML file. That is why the <code>DATABASE_URL</code>
+      uses <code>db:5432</code> — the API container reaches the Postgres container at the
+      hostname <code>db</code>.
+    </p>
+    <p>
+      From your laptop, you reach the API at <code>http://localhost:8000</code>. The
+      database is accessible from your laptop at <code>localhost:5432</code> (because of
+      the port mapping). Inside the containers, they reach each other by service name.
+    </p>
+  </section>
+
+  <section id="dev-vs-prod">
+    <h2>Development vs production Compose files</h2>
+    <p>
+      The volume mount (<code>- .:/app</code>) and <code>--reload</code> flag are
+      development-only. In production you do not want live code reloading or the host
+      filesystem mounted. A common pattern is separate files:
+    </p>
+    <pre><code">docker-compose.yml         # base config shared by both environments
+docker-compose.dev.yml     # development overrides (volume mounts, reload)
+docker-compose.prod.yml    # production overrides (no mounts, more replicas)
+</code></pre>
+    <p>In development:</p>
+    <pre><code">docker compose -f docker-compose.yml -f docker-compose.dev.yml up</code></pre>
+    <p>In production:</p>
+    <pre><code">docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d</code></pre>
+    <p>
+      For now, one file that works for development is fine. You will revisit this in
+      Chapter 6 when you deploy to a real cloud server.
+    </p>
+  </section>
+
+  <section id="useful-commands">
+    <h2>Docker commands you will use daily</h2>
+    <table>
+      <thead>
+        <tr><th>Command</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>docker build -t name .</code></td><td>Build image from Dockerfile in current directory</td></tr>
+        <tr><td><code>docker run -p 8000:8000 name</code></td><td>Run a container, mapping ports</td></tr>
+        <tr><td><code>docker ps</code></td><td>List running containers</td></tr>
+        <tr><td><code>docker ps -a</code></td><td>List all containers (including stopped)</td></tr>
+        <tr><td><code>docker logs &lt;name&gt;</code></td><td>View container stdout/stderr</td></tr>
+        <tr><td><code>docker exec -it &lt;name&gt; bash</code></td><td>Open a shell inside a running container</td></tr>
+        <tr><td><code>docker stop &lt;name&gt;</code></td><td>Stop a running container</td></tr>
+        <tr><td><code>docker rm &lt;name&gt;</code></td><td>Delete a stopped container</td></tr>
+        <tr><td><code>docker images</code></td><td>List all local images</td></tr>
+        <tr><td><code>docker rmi &lt;name&gt;</code></td><td>Delete an image</td></tr>
+        <tr><td><code>docker compose up -d</code></td><td>Start all Compose services in background</td></tr>
+        <tr><td><code>docker compose down</code></td><td>Stop all Compose services</td></tr>
+        <tr><td><code>docker compose logs -f</code></td><td>Stream logs from all services</td></tr>
+        <tr><td><code>docker compose exec api bash</code></td><td>Shell into the <code>api</code> service</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="assignment">
+    <h2>Assignment</h2>
+    <ol>
+      <li>
+        <strong>Read:</strong>
+        <a href="https://testdriven.io/blog/docker-best-practices/" target="_blank" rel="noopener">Docker Best Practices for Python Developers</a>
+        (TestDriven.io) — about 15 minutes.
+        <span class="why">This practitioner guide covers the mistakes Python developers make with Docker — non-slim base images, baking secrets into layers, poor layer caching — and the fixes. Most of what it covers is directly applicable to your AI backend.</span>
+      </li>
+      <li>
+        <strong>Do:</strong> Containerise the Project 7 API.
+        <ol>
+          <li>Create a <code>Dockerfile</code> in your Project 7 directory using the pattern in this lesson. Verify the layer order is correct (dependencies before code).</li>
+          <li>Create a <code>.dockerignore</code> file that excludes <code>.env</code>, <code>__pycache__</code>, and <code>.git</code></li>
+          <li>Build the image: <code>docker build -t ai-api .</code></li>
+          <li>Run it with your API key passed via <code>-e</code>: confirm <code>GET http://localhost:8000/health</code> returns 200</li>
+          <li>Create a <code>docker-compose.yml</code> that runs your API and a Postgres container (you won't use Postgres yet — just confirm both containers start and the API is healthy)</li>
+          <li>Test: <code>docker compose up -d</code> → wait for health → <code>curl http://localhost:8000/health</code> → <code>docker compose down</code></li>
+        </ol>
+        <strong>Expected output:</strong> <code>docker compose up -d</code> starts both services; <code>http://localhost:8000/docs</code> loads; <code>docker compose down</code> stops cleanly.
+        <span class="why">Everything in Chapter 3 onwards runs in Docker. If this step is solid, the rest of the chapter is straightforward. If it is shaky, every subsequent project will have environment issues. Take the time to get this right.</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="knowledge-check">
+    <h2>Knowledge Check</h2>
+    <p class="kc-intro">Answer from memory, then click to reveal.</p>
+    <ul>
+      <li>
+        <details>
+          <summary>Why should you copy <code>pyproject.toml</code> and install dependencies <em>before</em> copying the rest of your application code?</summary>
+          <div class="answer">
+            Docker caches each layer. When you rebuild, it only re-runs instructions from the first
+            changed layer downwards. Dependencies change rarely; application code changes constantly.
+            Copying dependencies first means a code change only invalidates the final <code>COPY . .</code>
+            layer — the expensive dependency install layer stays cached.
+            <br><a href="#dockerfile">→ Layer caching</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>How do containers in the same Docker Compose file communicate with each other?</summary>
+          <div class="answer">
+            Docker Compose automatically puts all services on a shared network. Each service is
+            reachable at a hostname equal to its service name in the YAML file. So if your database
+            service is named <code>db</code>, your API container reaches it at hostname <code>db</code>
+            on port 5432 — not <code>localhost</code>.
+            <br><a href="#docker-compose">→ Service networking in Compose</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>Why should you never copy your <code>.env</code> file into a Docker image?</summary>
+          <div class="answer">
+            Docker images are portable and may be pushed to registries (Docker Hub, GitHub Packages,
+            AWS ECR) where others can pull them. A <code>.env</code> baked into the image exposes
+            your API keys to anyone with image access. Always pass secrets at runtime via
+            environment variables or a secrets manager.
+            <br><a href="#build-run">→ Never bake secrets into images</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>What does <code>depends_on: condition: service_healthy</code> do in a Compose file?</summary>
+          <div class="answer">
+            It tells Docker Compose to wait until the dependency service reports a healthy status
+            (via its <code>healthcheck</code>) before starting the current service. Without it,
+            the API container might start before Postgres finishes initialising, causing connection
+            errors at startup.
+            <br><a href="#docker-compose">→ Docker Compose</a>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </div>
+
+  <div class="additional-resources">
+    <h2>Additional Resources</h2>
+    <ul>
+      <li><a href="https://docs.docker.com/get-started/" target="_blank" rel="noopener">Docker official Get Started guide</a> — the definitive intro if you want to go deeper on images, volumes, and networks</li>
+      <li><a href="https://docs.docker.com/compose/compose-file/" target="_blank" rel="noopener">Docker Compose file reference</a> — every option in the YAML format</li>
+      <li><a href="https://labs.play-with-docker.com/" target="_blank" rel="noopener">Play With Docker</a> — a free browser-based Docker sandbox; useful if Docker Desktop is slow on your machine</li>
+    </ul>
+  </div>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Questions? Type in the prompt to ask your teacher.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="P007-ai-rest-api.html">Project: AI-powered REST API</a>
+    <a class="next" href="0022-postgres-sqlalchemy.html">PostgreSQL and SQLAlchemy for AI backends</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('0021-docker-for-ai');
+  initThemeToggle();
+</script>
+</body>
+</html>

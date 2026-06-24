@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Background workers with Celery — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 3: Production AI Backends
+    <span>›</span>
+    Lesson 24
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 3 · Lesson 24</p>
+    <h1>Background workers with Celery</h1>
+    <p class="lesson-desc">35–45 min read · Hands-on coding</p>
+  </header>
+
+  <section id="motivation">
+    <h2>Motivation</h2>
+    <p>
+      Async Python handles concurrent I/O-bound work well. But some AI tasks are simply
+      too long for an HTTP response: processing a 500-page PDF might take 3 minutes;
+      running an agent that makes 20 tool calls might take 5. Keeping an HTTP connection
+      open for 5 minutes is fragile — mobile networks drop connections, browser tabs time
+      out, load balancers kill long requests.
+    </p>
+    <p>
+      The solution is to decouple the <strong>request</strong> (accept the job) from the
+      <strong>processing</strong> (do the work). The API immediately returns a job ID. A
+      background worker picks up the job from a queue and processes it. The client polls
+      a status endpoint or receives a webhook when the work is done. This is the standard
+      pattern for every AI system that does heavy processing — document ingestion pipelines,
+      batch evaluations, multi-step research agents. Celery is the most widely used
+      Python implementation.
+    </p>
+  </section>
+
+  <section id="prerequisites">
+    <div class="learning-outcomes">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="P008-docker-postgres.html">Project 8</a>: The Dockerised API with Postgres — Celery jobs will store results there</li>
+        <li><a href="0021-docker-for-ai.html">Lesson 21</a>: Docker Compose — Celery and Redis run as additional services</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="how-celery-works">
+    <h2>How Celery works</h2>
+    <p>
+      Celery has three components:
+    </p>
+    <ol>
+      <li>
+        <strong>The message broker</strong> — a queue that holds pending tasks. Redis is
+        the standard choice for AI backends (you already have it in your Compose stack
+        from Project 8). When your FastAPI route calls
+        <code>some_task.delay()</code>, it pushes a message onto the Redis queue.
+      </li>
+      <li>
+        <strong>The worker process</strong> — a separate Python process that watches the
+        queue, picks up tasks, and executes them. The worker runs your task functions.
+        It is completely separate from the FastAPI server process.
+      </li>
+      <li>
+        <strong>The result backend</strong> — where task results are stored so the caller
+        can retrieve them later. Redis can serve as the result backend too, or you can
+        store results in your Postgres database.
+      </li>
+    </ol>
+    <p>
+      The flow for a long AI job:
+    </p>
+    <pre><code">POST /process-document   → FastAPI saves the job to DB, calls task.delay()
+                         → Returns {"job_id": "abc-123", "status": "queued"}
+
+(Meanwhile, the Celery worker picks up the job from Redis...)
+
+GET /jobs/abc-123       → Returns {"status": "processing", "progress": 40}
+GET /jobs/abc-123       → Returns {"status": "complete", "result": {...}}
+</code></pre>
+  </section>
+
+  <section id="setup">
+    <h2>Setting up Celery</h2>
+    <pre><code">uv add celery[redis]</code></pre>
+
+    <p>
+      Create a <code>tasks.py</code> file. This is where you define your Celery application
+      and your task functions:
+    </p>
+    <pre><code">import os
+from celery import Celery
+from dotenv import load_dotenv
+
+load_dotenv()
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+
+# Create the Celery app
+celery_app = Celery(
+    "ai_tasks",
+    broker=REDIS_URL,          # where tasks are queued
+    backend=REDIS_URL,         # where results are stored
+    include=["tasks"],         # Python modules containing task definitions
+)
+
+celery_app.conf.update(
+    task_serializer="json",
+    result_serializer="json",
+    accept_content=["json"],
+    result_expires=3600,       # results expire after 1 hour
+)
+</code></pre>
+    <p>
+      Add the worker and Redis to your Compose file:
+    </p>
+    <pre><code">services:
+  # ... api and db services from P008 ...
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    command: celery -A tasks.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - db
+</code></pre>
+    <p>
+      The worker runs the same Docker image as the API — it shares your codebase. The
+      only difference is the command: instead of <code>uvicorn</code>, it runs the Celery
+      worker process.
+    </p>
+  </section>
+
+  <section id="defining-tasks">
+    <h2>Defining and calling tasks</h2>
+    <p>
+      A Celery task is a regular Python function decorated with <code>@celery_app.task</code>.
+      Here is a document processing task that a user might submit via API:
+    </p>
+    <pre><code">import json
+from openai import OpenAI   # Note: Celery tasks use sync OpenAI — no async in Celery workers
+from tasks import celery_app
+
+@celery_app.task(bind=True, max_retries=3)
+def process_document(self, document_text: str, job_id: str):
+    """
+    Extract entities, classify, and summarize a document.
+    Runs in the Celery worker — not the FastAPI process.
+    """
+    client = OpenAI()
+
+    try:
+        # Step 1: Extract entities
+        entity_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": f"Extract key entities (people, places, dates) from:\n\n{document_text[:4000]}"
+            }],
+        )
+        entities = entity_response.choices[0].message.content
+
+        # Step 2: Classify
+        classify_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Classify this document as one of: legal, financial, technical, general.\n\n"
+                    f"Respond with just the label.\n\n{document_text[:2000]}"
+                )
+            }],
+        )
+        category = classify_response.choices[0].message.content.strip()
+
+        # Step 3: Summarize
+        summary_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": f"Summarize in 3 sentences:\n\n{document_text[:6000]}"
+            }],
+        )
+        summary = summary_response.choices[0].message.content
+
+        return {
+            "job_id": job_id,
+            "status": "complete",
+            "entities": entities,
+            "category": category,
+            "summary": summary,
+        }
+
+    except Exception as exc:
+        # Retry with exponential backoff on failure
+        raise self.retry(exc=exc, countdown=2 ** self.request.retries)
+</code></pre>
+    <div class="callout info">
+      <strong>Sync, not async in Celery workers:</strong> Celery workers run synchronous
+      Python, not async. Use the regular <code>OpenAI()</code> client, not
+      <code>AsyncOpenAI()</code>. If you need to call async code from a Celery task, use
+      <code>asyncio.run()</code> to create a fresh event loop.
+    </div>
+  </section>
+
+  <section id="fastapi-integration">
+    <h2>Wiring Celery into FastAPI</h2>
+    <p>
+      The FastAPI route accepts the job, saves a record to the database, and queues the
+      Celery task. It returns immediately with a job ID — the client does not wait for
+      the processing to finish:
+    </p>
+    <pre><code">from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import get_db, Job
+from tasks import process_document
+
+router = APIRouter(prefix="/jobs", tags=["jobs"])
+
+class SubmitJobRequest(BaseModel):
+    document_text: str = Field(..., min_length=100, max_length=100_000)
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str            # queued, processing, complete, failed
+    result: dict | None
+
+@router.post("/", response_model=JobStatusResponse, status_code=202)
+async def submit_job(
+    req: SubmitJobRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    import uuid
+    job_id = str(uuid.uuid4())
+
+    # Save job record to database
+    job = Job(id=job_id, status="queued", document_text=req.document_text)
+    db.add(job)
+    await db.commit()
+
+    # Queue the Celery task — returns immediately
+    process_document.delay(req.document_text, job_id)
+
+    return JobStatusResponse(job_id=job_id, status="queued", result=None)
+
+@router.get("/{job_id}", response_model=JobStatusResponse)
+async def get_job(job_id: str, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    result = await db.execute(select(Job).where(Job.id == job_id))
+    job = result.scalar_one_or_none()
+    if job is None:
+        raise HTTPException(404, "Job not found")
+    return JobStatusResponse(job_id=job.id, status=job.status, result=job.result)
+</code></pre>
+    <p>
+      HTTP status <code>202 Accepted</code> (instead of 200) signals to the caller that
+      the request was accepted but the work is not yet complete. This is the correct
+      semantic for asynchronous jobs.
+    </p>
+  </section>
+
+  <section id="retries">
+    <h2>Retries and error handling</h2>
+    <p>
+      LLM API calls fail transiently — rate limits, timeouts, temporary outages. Celery's
+      retry mechanism handles this cleanly:
+    </p>
+    <pre><code">@celery_app.task(bind=True, max_retries=3)
+def process_document(self, document_text: str, job_id: str):
+    try:
+        # ... do the work ...
+    except openai.RateLimitError as exc:
+        # Retry after exponential backoff: 2^0=1s, 2^1=2s, 2^2=4s
+        raise self.retry(exc=exc, countdown=2 ** self.request.retries)
+    except openai.APIError as exc:
+        raise self.retry(exc=exc, countdown=5)
+    except Exception as exc:
+        # Non-retryable error — update the job record and give up
+        update_job_status(job_id, "failed", error=str(exc))
+        raise   # Re-raise so Celery marks the task as FAILURE
+</code></pre>
+    <p>
+      <code>bind=True</code> gives the task function access to <code>self</code>, which
+      has <code>self.request.retries</code> (how many times it has retried so far) and
+      <code>self.retry()</code> (re-queue with a delay).
+    </p>
+  </section>
+
+  <section id="monitoring">
+    <h2>Monitoring with Flower</h2>
+    <p>
+      <strong>Flower</strong> is a web dashboard for Celery that shows active workers,
+      task history, success/failure rates, and task details. Add it to Compose:
+    </p>
+    <pre><code">  flower:
+    image: mher/flower:latest
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+</code></pre>
+    <p>
+      Open <code>http://localhost:5555</code> to see the dashboard. During development,
+      Flower is invaluable for confirming that tasks are being queued and processed, and
+      for inspecting failures.
+    </p>
+  </section>
+
+  <section id="when-to-use">
+    <h2>When to use Celery vs async FastAPI</h2>
+    <table>
+      <thead>
+        <tr><th>Scenario</th><th>Use</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Single LLM call, &lt;5 seconds</td><td>Async FastAPI route</td></tr>
+        <tr><td>Parallel LLM calls, &lt;30 seconds</td><td>asyncio.gather in async route</td></tr>
+        <tr><td>Long multi-step AI pipeline (&gt;30 seconds)</td><td>Celery task</td></tr>
+        <tr><td>Batch processing (100 documents)</td><td>Celery with multiple workers</td></tr>
+        <tr><td>Scheduled recurring jobs (nightly report)</td><td>Celery Beat (scheduler)</td></tr>
+        <tr><td>Task must survive server restart</td><td>Celery (persisted in Redis)</td></tr>
+        <tr><td>Task result needed in the same HTTP response</td><td>Async FastAPI route</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="assignment">
+    <h2>Assignment</h2>
+    <ol>
+      <li>
+        <strong>Read:</strong>
+        <a href="https://testdriven.io/blog/fastapi-and-celery/" target="_blank" rel="noopener">Asynchronous Tasks with FastAPI and Celery</a>
+        (TestDriven.io) — about 15 minutes.
+        <span class="why">TestDriven.io is the most practical source for Python backend patterns. This specific article shows the exact project structure and task flow for FastAPI + Celery — including the polling pattern — which is the architecture you're implementing in P009.</span>
+      </li>
+      <li>
+        <strong>Do:</strong> Add a background document processing endpoint.
+        <ol>
+          <li>Add a <code>Job</code> table to your database with columns: <code>id</code> (UUID string, primary key), <code>status</code> (string: queued/processing/complete/failed), <code>result</code> (JSON text, nullable), <code>created_at</code> (timestamp). Generate an Alembic migration for it.</li>
+          <li>Create <code>tasks.py</code> with the Celery app and a <code>process_document</code> task that: extracts 3 key points (LLM), generates a one-sentence summary (LLM), then updates the job record in Postgres with <code>status="complete"</code> and the results as JSON</li>
+          <li>Add <code>POST /jobs</code> (accepts document text, queues task, returns job ID with 202) and <code>GET /jobs/{id}</code> (returns current status and result)</li>
+          <li>Add the worker service to <code>docker-compose.yml</code> and Flower on port 5555</li>
+          <li>Test end-to-end: submit a document via <code>POST /jobs</code>, observe the task in Flower, poll <code>GET /jobs/{id}</code> until status is "complete"</li>
+        </ol>
+        <strong>Expected output:</strong> A job that starts queued, becomes processing (visible in Flower), and reaches complete with the extracted points and summary stored in the database.
+        <span class="why">Background job queues appear in almost every AI engineering architecture. The specific implementation here — submit → poll → retrieve — is what you'll see in document ingestion pipelines, batch eval systems, and any AI feature where the processing time exceeds what an HTTP timeout allows.</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="knowledge-check">
+    <h2>Knowledge Check</h2>
+    <p class="kc-intro">Answer from memory, then click to reveal.</p>
+    <ul>
+      <li>
+        <details>
+          <summary>What are the three components of Celery and what does each one do?</summary>
+          <div class="answer">
+            1. <strong>Broker</strong> — a message queue (usually Redis) that holds pending tasks between the FastAPI process and the worker.
+            2. <strong>Worker</strong> — a separate Python process that watches the broker, picks up tasks, and executes them.
+            3. <strong>Result backend</strong> — storage (Redis or a database) where completed task results are persisted so the caller can retrieve them.
+            <br><a href="#how-celery-works">→ How Celery works</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>Why does a long-running AI job return HTTP 202 instead of 200?</summary>
+          <div class="answer">
+            202 Accepted means "the request was received and queued, but the work is not yet
+            finished." 200 OK means "the request was completed successfully." Returning 200 for
+            a queued job would mislead the client into thinking the work is done when it isn't.
+            <br><a href="#fastapi-integration">→ Wiring Celery into FastAPI</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>Why can't Celery task functions use <code>async def</code> and <code>await</code> directly?</summary>
+          <div class="answer">
+            Celery workers run synchronous Python — they do not run inside an asyncio event loop.
+            Using <code>await</code> outside an event loop raises a RuntimeError. If you need to
+            call async code from a Celery task, you must create an event loop manually with
+            <code>asyncio.run(your_async_function())</code>, which runs the async function
+            synchronously from the worker's perspective.
+            <br><a href="#defining-tasks">→ Defining tasks (callout)</a>
+          </div>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>When should you use Celery instead of asyncio.gather for an AI task?</summary>
+          <div class="answer">
+            Use Celery when: (1) the task takes longer than a reasonable HTTP timeout (30+ seconds);
+            (2) the task must survive a server restart (Celery persists jobs in Redis);
+            (3) you need to scale workers independently of the API; or (4) you need scheduled
+            recurring jobs. For tasks under 30 seconds where the result is needed in the same
+            HTTP response, <code>asyncio.gather</code> in an async route is simpler and sufficient.
+            <br><a href="#when-to-use">→ When to use Celery vs async FastAPI</a>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </div>
+
+  <div class="additional-resources">
+    <h2>Additional Resources</h2>
+    <ul>
+      <li><a href="https://docs.celeryq.dev/en/stable/" target="_blank" rel="noopener">Celery documentation</a> — the official reference; especially the "First Steps with Celery" section</li>
+      <li><a href="https://docs.celeryq.dev/en/stable/userguide/tasks.html" target="_blank" rel="noopener">Celery task documentation</a> — all task options including retries, timeouts, and priorities</li>
+      <li><a href="https://flower.readthedocs.io/en/latest/" target="_blank" rel="noopener">Flower documentation</a> — monitoring dashboard for Celery</li>
+    </ul>
+  </div>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Questions? Type in the prompt to ask your teacher.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="P008-docker-postgres.html">Project: Containerize your API</a>
+    <a class="next" href="0025-mcp-servers.html">MCP servers — extending AI applications</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('0024-celery-workers');
+  initThemeToggle();
+</script>
+</body>
+</html>

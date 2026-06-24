@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter Project: Full AI Backend Service — AI Engineering Curriculum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="lesson-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">AI Engineering Curriculum</a>
+    <span>›</span>
+    Chapter 3: Production AI Backends
+    <span>›</span>
+    Chapter Project
+  </nav>
+
+  <header class="lesson-header">
+    <p class="lesson-meta">Chapter 3 · Chapter Project <span class="project-badge chapter">Chapter Project</span></p>
+    <h1>Full AI Backend Service</h1>
+    <p class="lesson-desc">Estimated time: 6–10 hours · Portfolio-grade · Deployable</p>
+  </header>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      This is the Chapter 3 capstone. It integrates every pattern from the chapter into
+      a production-shaped service that you can deploy, demonstrate, and discuss in
+      interviews. The system accepts document uploads, processes them asynchronously,
+      persists results, and exposes a clean API — the architecture that backs real document
+      intelligence products.
+    </p>
+    <p>The system implements:</p>
+    <ul>
+      <li><strong>FastAPI REST API</strong> with proper Pydantic models and error handling (Lessons 18–19)</li>
+      <li><strong>Async throughout</strong> — all routes, all LLM calls, all DB queries (Lesson 20)</li>
+      <li><strong>Docker Compose</strong> — four services, single command to start (Lesson 21)</li>
+      <li><strong>PostgreSQL with SQLAlchemy</strong> — conversation and job persistence (Lesson 22)</li>
+      <li><strong>Alembic migrations</strong> — all schema changes are versioned (Lesson 23)</li>
+      <li><strong>Celery background workers</strong> — long AI tasks dequeued and processed (Lesson 24)</li>
+      <li><strong>MCP server</strong> — exposes the system's capabilities to AI clients (Lesson 25)</li>
+    </ul>
+    <div class="callout info">
+      <strong>Portfolio note:</strong> A deployed, running instance of this project — with
+      an API you can curl, a Flower dashboard showing workers, and an MCP server you can
+      connect to from Claude — is a strong interview artifact. Take time to polish the README
+      and make it publicly accessible on GitHub.
+    </div>
+  </section>
+
+  <section id="system-design">
+    <h2>System design</h2>
+
+    <h3>User-facing flows</h3>
+    <p>
+      The system supports two distinct usage patterns:
+    </p>
+    <ol>
+      <li>
+        <strong>Synchronous chat</strong> — the user sends a message, the LLM replies in
+        real time. Backed by conversation history in PostgreSQL.
+      </li>
+      <li>
+        <strong>Asynchronous document processing</strong> — the user submits a document,
+        receives a job ID immediately, and polls for results. The Celery worker processes
+        the document (extract, classify, summarize) and stores results.
+      </li>
+    </ol>
+
+    <h3>Architecture diagram</h3>
+    <pre><code">Client
+  │
+  ▼
+FastAPI (port 8000)        ─── PostgreSQL (port 5432)
+  │                              ├── conversations table
+  ├── /conversations/*           ├── messages table
+  ├── /jobs/*                    ├── jobs table
+  ├── /chat                      └── documents table
+  └── /health
+  │
+  ▼
+Redis (port 6379)  ◄──── Celery Worker
+                              ├── process_document task
+                              └── batch_classify task
+
+MCP Server (stdio / port 8001)
+  ├── tool: summarize_text
+  ├── tool: classify_text
+  ├── tool: get_job_status
+  └── resource: api://jobs/recent
+</code></pre>
+
+    <h3>Docker Compose services</h3>
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Image</th><th>Exposed port</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>api</code></td><td>Your Dockerfile</td><td>8000</td></tr>
+        <tr><td><code>db</code></td><td>postgres:16-alpine</td><td>5432</td></tr>
+        <tr><td><code>redis</code></td><td>redis:7-alpine</td><td>6379</td></tr>
+        <tr><td><code>worker</code></td><td>Your Dockerfile (different command)</td><td>—</td></tr>
+        <tr><td><code>flower</code></td><td>mher/flower</td><td>5555</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-spec">
+    <h2>API specification</h2>
+
+    <h3>Conversations</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>POST</td><td><code>/conversations</code></td><td>Create a conversation</td></tr>
+        <tr><td>GET</td><td><code>/conversations</code></td><td>List conversations (recent first)</td></tr>
+        <tr><td>GET</td><td><code>/conversations/{id}</code></td><td>Get conversation with messages</td></tr>
+        <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send message, receive LLM reply</td></tr>
+        <tr><td>DELETE</td><td><code>/conversations/{id}</code></td><td>Delete conversation + messages</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Document processing jobs</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>POST</td><td><code>/jobs</code></td><td>Submit a document for processing (returns 202 + job ID)</td></tr>
+        <tr><td>GET</td><td><code>/jobs/{id}</code></td><td>Get job status and result</td></tr>
+        <tr><td>GET</td><td><code>/jobs</code></td><td>List recent jobs (last 20)</td></tr>
+        <tr><td>DELETE</td><td><code>/jobs/{id}</code></td><td>Cancel a queued job (or delete a completed one)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Utility</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GET</td><td><code>/health</code></td><td>Returns service status, DB connectivity, worker count</td></tr>
+        <tr><td>POST</td><td><code>/chat</code></td><td>Stateless single-turn chat (from P007)</td></tr>
+        <tr><td>POST</td><td><code>/chat/batch</code></td><td>Concurrent batch chat (from P007)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="celery-tasks">
+    <h2>Celery task specification</h2>
+
+    <h3><code>process_document</code></h3>
+    <p>
+      Triggered by <code>POST /jobs</code>. Runs three sequential LLM calls:
+    </p>
+    <ol>
+      <li><strong>Extract key points</strong> — 5 bullet-point key findings from the document</li>
+      <li><strong>Classify</strong> — assigns one of: legal, financial, technical, medical, general</li>
+      <li><strong>Summarize</strong> — a 3-sentence executive summary</li>
+    </ol>
+    <p>
+      Stores all three results in the <code>jobs</code> table as JSON. Updates status
+      from <code>queued</code> → <code>processing</code> → <code>complete</code> (or
+      <code>failed</code>). Retries on OpenAI errors up to 3 times with exponential backoff.
+    </p>
+
+    <h3><code>batch_classify</code></h3>
+    <p>
+      Accepts a list of texts and labels. Classifies all in parallel using Python
+      <code>ThreadPoolExecutor</code> (sync OpenAI client, multi-threaded). Returns a list
+      of <code>{text_index, label, confidence}</code> objects.
+    </p>
+    <div class="callout info">
+      <strong>ThreadPoolExecutor in Celery:</strong> Celery workers are synchronous, so
+      you can't use <code>asyncio.gather</code>. For parallelism inside a task, use
+      <code>concurrent.futures.ThreadPoolExecutor</code> — each thread makes its own
+      synchronous OpenAI call.
+    </div>
+  </section>
+
+  <section id="database-schema">
+    <h2>Database schema</h2>
+    <p>
+      All tables must be managed via Alembic. Your migrations directory should have:
+    </p>
+    <ol>
+      <li><strong>Migration 1:</strong> Create <code>conversations</code> and <code>messages</code> tables</li>
+      <li><strong>Migration 2:</strong> Create <code>jobs</code> table with columns: <code>id</code> (UUID), <code>status</code>, <code>document_text</code>, <code>result_json</code> (TEXT, nullable), <code>error_message</code> (TEXT, nullable), <code>created_at</code>, <code>completed_at</code> (nullable)</li>
+      <li><strong>Migration 3:</strong> Add <code>cost_usd</code> (FLOAT, nullable) to <code>messages</code></li>
+    </ol>
+  </section>
+
+  <section id="mcp-spec">
+    <h2>MCP server specification</h2>
+    <p>
+      Build an MCP server (<code>mcp_server.py</code>) that exposes the system to AI clients:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>summarize_text</code></td><td>Tool</td><td>Summarizes text using the AI backend</td></tr>
+        <tr><td><code>classify_document</code></td><td>Tool</td><td>Classifies text into legal/financial/technical/medical/general</td></tr>
+        <tr><td><code>submit_document_job</code></td><td>Tool</td><td>Submits a document to the processing queue and returns a job ID</td></tr>
+        <tr><td><code>get_job_status</code></td><td>Tool</td><td>Returns current status and result (if complete) for a job ID</td></tr>
+        <tr><td><code>api://jobs/recent</code></td><td>Resource</td><td>JSON list of the 10 most recent jobs with their statuses</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The MCP tools that call the API should use <code>httpx</code> to call your FastAPI
+      server (which is running on <code>localhost:8000</code> or the container's hostname).
+    </p>
+  </section>
+
+  <section id="completion-checklist">
+    <h2>Completion checklist</h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox"> <code>docker compose up -d</code> starts all 5 services with no errors</label></li>
+      <li><label><input type="checkbox"> <code>GET /health</code> returns 200 with DB connectivity confirmed</label></li>
+      <li><label><input type="checkbox"> <code>alembic history</code> shows 3 migrations; <code>alembic current</code> shows head</label></li>
+      <li><label><input type="checkbox"> Full conversation flow: create → 3 messages → get (verifies context memory) → delete</label></li>
+      <li><label><input type="checkbox"> Job flow: POST /jobs → 202 response → GET /jobs/{id} shows "queued" → poll until "complete" → result has key_points, category, summary</label></li>
+      <li><label><input type="checkbox"> Job failure: submit a job with empty text → job reaches "failed" with a meaningful error message</label></li>
+      <li><label><input type="checkbox"> Flower dashboard at http://localhost:5555 shows the worker and processed tasks</label></li>
+      <li><label><input type="checkbox"> <code>docker compose down</code> → <code>docker compose up -d</code> → all conversations and jobs are still in the database</label></li>
+      <li><label><input type="checkbox"> MCP server's <code>submit_document_job</code> tool submits a job; <code>get_job_status</code> returns the result</label></li>
+      <li><label><input type="checkbox"> All Pydantic models have constraints — <code>/docs</code> shows them</label></li>
+      <li><label><input type="checkbox"> No secrets in the codebase — API key comes from environment variable only</label></li>
+      <li><label><input type="checkbox"> <code>.env</code> is in both <code>.dockerignore</code> and <code>.gitignore</code></label></li>
+      <li><label><input type="checkbox"> A <code>README.md</code> explains how to run the project (1 page max — just the commands needed)</label></li>
+    </ul>
+  </section>
+
+  <section id="project-structure">
+    <h2>Suggested project structure</h2>
+    <pre><code">ai-backend/
+├── Dockerfile
+├── docker-compose.yml
+├── entrypoint.sh
+├── .env                     # not committed
+├── .dockerignore
+├── .gitignore
+├── alembic.ini
+├── alembic/
+│   ├── env.py
+│   └── versions/
+│       ├── 001_create_conversations_messages.py
+│       ├── 002_create_jobs.py
+│       └── 003_add_cost_usd_to_messages.py
+├── main.py                  # FastAPI app, includes routers
+├── database.py              # SQLAlchemy models + engine + get_db
+├── tasks.py                 # Celery app + task definitions
+├── mcp_server.py            # MCP server
+├── dependencies.py          # get_client(), require_api_key()
+├── routers/
+│   ├── conversations.py
+│   ├── jobs.py
+│   ├── chat.py
+│   └── health.py
+└── models/
+    ├── requests.py
+    └── responses.py
+</code></pre>
+  </section>
+
+  <section id="extension">
+    <h2>Extension challenges</h2>
+    <ol>
+      <li>
+        <strong>Streaming chat endpoint:</strong> Add <code>POST /chat/stream</code> that
+        uses FastAPI's <code>StreamingResponse</code> and the OpenAI streaming API to
+        send tokens as they are generated. Use Server-Sent Events format.
+      </li>
+      <li>
+        <strong>API key authentication:</strong> Add bearer token authentication to all
+        endpoints except <code>/health</code>. Store valid API keys in Postgres and
+        verify via a dependency.
+      </li>
+      <li>
+        <strong>Job priority:</strong> Add a <code>priority</code> field to job submission
+        (low/normal/high). Use Celery's task priority feature to process high-priority
+        jobs before low-priority ones.
+      </li>
+      <li>
+        <strong>Webhook notifications:</strong> Add an optional <code>callback_url</code>
+        to job submission. When a job completes, the Celery task makes an HTTP POST to
+        the callback URL with the result. This removes the need for the client to poll.
+      </li>
+      <li>
+        <strong>Deploy it:</strong> Push to a GitHub repo, set up a Hetzner CX21 VM
+        (€3.29/month), install Docker, and run <code>docker compose up -d</code> on the
+        VM. This is the Chapter 6 deployment you will do properly — doing it now for
+        practice is valuable.
+      </li>
+    </ol>
+  </section>
+
+  <footer class="lesson-footer">
+    <span style="color: var(--text-muted); font-size: 0.9rem;">Questions? Type in the prompt to ask your teacher.</span>
+    <button class="btn-complete" id="btn-complete" type="button">Mark as complete</button>
+  </footer>
+  <nav class="lesson-nav">
+    <a class="prev" href="0025-mcp-servers.html">MCP servers</a>
+    <a class="next" href="0026-what-is-rag.html">Chapter 4: What is RAG and why LLMs need it</a>
+  </nav>
+
+</div>
+<script type="module">
+  import { initMarkComplete } from '../assets/progress.js';
+  import { initThemeToggle } from '../assets/theme.js';
+  initMarkComplete('P009-ch3-ai-backend');
+  initThemeToggle();
+</script>
+</body>
+</html>

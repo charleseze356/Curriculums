@@ -68,8 +68,37 @@
       "number": 3,
       "title": "Production AI Backends",
       "goal": "Build a scalable backend that exposes AI capabilities via a clean API, runs in Docker, and persists data.",
-      "topics": [],
-      "status": "planned"
+      "topics": [
+        {
+          "id": "ch3-api",
+          "title": "API foundations",
+          "items": [
+            { "id": "0018", "type": "lesson",  "title": "FastAPI fundamentals for AI apps",              "file": "lessons/0018-fastapi-basics.html" },
+            { "id": "0019", "type": "lesson",  "title": "Pydantic for input/output validation",          "file": "lessons/0019-pydantic-validation.html" },
+            { "id": "0020", "type": "lesson",  "title": "Async Python — why it matters for AI",          "file": "lessons/0020-async-python.html" },
+            { "id": "P007", "type": "project", "title": "Build an AI-powered REST API",                  "file": "lessons/P007-ai-rest-api.html" }
+          ]
+        },
+        {
+          "id": "ch3-infra",
+          "title": "Infrastructure and persistence",
+          "items": [
+            { "id": "0021", "type": "lesson",  "title": "Docker for AI applications",                    "file": "lessons/0021-docker-for-ai.html" },
+            { "id": "0022", "type": "lesson",  "title": "PostgreSQL and SQLAlchemy for AI backends",     "file": "lessons/0022-postgres-sqlalchemy.html" },
+            { "id": "0023", "type": "lesson",  "title": "Database migrations with Alembic",              "file": "lessons/0023-alembic-migrations.html" },
+            { "id": "P008", "type": "project", "title": "Containerize your API with Docker and PostgreSQL", "file": "lessons/P008-docker-postgres.html" }
+          ]
+        },
+        {
+          "id": "ch3-advanced",
+          "title": "Background workers and MCP",
+          "items": [
+            { "id": "0024", "type": "lesson",          "title": "Background workers with Celery",        "file": "lessons/0024-celery-workers.html" },
+            { "id": "0025", "type": "lesson",          "title": "MCP servers — extending AI applications","file": "lessons/0025-mcp-servers.html" },
+            { "id": "P009", "type": "chapter-project", "title": "Full AI backend service",                "file": "lessons/P009-ch3-ai-backend.html" }
+          ]
+        }
+      ]
     },
     {
       "id": "ch4",
