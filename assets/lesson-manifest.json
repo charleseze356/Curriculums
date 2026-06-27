@@ -1,3 +1,24 @@
 {
-  "chapters": []
+  "chapters": [
+    {
+      "id": "hss-ch1",
+      "number": 1,
+      "title": "The Big Picture — HSS as a Third Science",
+      "goal": "Understand what health systems science is, why it exists alongside basic and clinical science, and how its domains are organized.",
+      "topics": [
+        {
+          "id": "hss-ch1-foundations",
+          "title": "What is HSS?",
+          "items": [
+            {
+              "id": "hss-0001",
+              "type": "lesson",
+              "title": "What Is Health Systems Science?",
+              "file": "lessons/hss-0001-what-is-hss.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
