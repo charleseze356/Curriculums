@@ -9,6 +9,15 @@ prev: null
 prev_title: null
 next: hss-0002-systems-thinking.html
 next_title: "Systems Thinking in Health Care"
+knowledge_check:
+  - q: "Why is HSS called the 'third' medical science? What are the other two?"
+    a: "The first two are basic science (how the body works) and clinical science (how to diagnose and treat disease). HSS is the third because it addresses a gap neither covers: how care is organized, delivered, and improved within complex systems."
+  - q: "What is the linking domain in the HSS curricular model, and why is it a linking domain rather than just another domain?"
+    a: "Systems thinking. It links all other domains because it is the cognitive habit that lets you see any problem — safety, quality, cost, teamwork — as an output of a system rather than an isolated event. Without it, the other domains remain disconnected."
+  - q: "Name the difference between a core functional domain and a foundational domain in the HSS model."
+    a: "Core functional domains are what physicians directly apply in practice (e.g., value in health care, clinical informatics, population health). Foundational domains enable that practice (e.g., patient safety, quality improvement, teamwork). Think: foundational domains build the floor; functional domains are what you walk on."
+  - q: "Name two ways the changing health care environment made HSS necessary."
+    a: "Any two of: increased complexity of care teams, rise of chronic disease management, shift toward value-based payment, electronic health records requiring data literacy, population health accountability — all require system-level competencies beyond diagnosis and treatment."
 ---
 
 ## Why this lesson exists
