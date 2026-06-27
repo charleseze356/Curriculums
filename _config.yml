@@ -1,7 +1,7 @@
-title: AI Engineering Curriculum
-description: A self-paced curriculum to go from Python developer to hireable AI Engineer — in the spirit of The Odin Project.
-baseurl: "/ai-engineering-curriculum"
-url: "https://supermo0.github.io"
+title: Curriculums
+description: Charles's self-built, grounded learning roadmaps — what to master for a topic, and in what order.
+baseurl: "/Curriculums"
+url: "https://charleseze356.github.io"
 
 markdown: kramdown
 highlighter: rouge
