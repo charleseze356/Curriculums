@@ -20,6 +20,8 @@ knowledge_check:
     a: "Any two of: increased complexity of care teams, rise of chronic disease management, shift toward value-based payment, electronic health records requiring data literacy, population health accountability — all require system-level competencies beyond diagnosis and treatment."
 ---
 
+*This is the map lesson for the entire HSS curriculum. Every subsequent lesson hangs off the framework established here — read it first, return to it when later lessons feel disconnected.*
+
 ## Why this lesson exists
 
 Medical school teaches two sciences: **basic science** (how the body works) and **clinical science** (how to diagnose and treat disease). For most of the 20th century, that was considered sufficient.
