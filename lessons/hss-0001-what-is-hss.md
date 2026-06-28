@@ -7,8 +7,8 @@ title: "What Is Health Systems Science?"
 description: "HSS is the third pillar of medical education — alongside basic and clinical science — that prepares physicians to understand and improve the systems in which they practice."
 prev: null
 prev_title: null
-next: hss-0002-systems-thinking.html
-next_title: "Systems Thinking in Health Care"
+next: hss-0002-hss2-overview.html
+next_title: "HSS-2 Overview — From Theory to Practice"
 knowledge_check:
   - q: "Why is HSS called the 'third' medical science? What are the other two?"
     a: "The first two are basic science (how the body works) and clinical science (how to diagnose and treat disease). HSS is the third because it addresses a gap neither covers: how care is organized, delivered, and improved within complex systems."

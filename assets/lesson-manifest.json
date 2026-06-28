@@ -15,6 +15,58 @@
               "type": "lesson",
               "title": "What Is Health Systems Science?",
               "file": "lessons/hss-0001-what-is-hss.html"
+            },
+            {
+              "id": "hss-0002",
+              "type": "lesson",
+              "title": "HSS-2 Overview — From Theory to Practice",
+              "file": "lessons/hss-0002-hss2-overview.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hss-ch2",
+      "number": 2,
+      "title": "How the System Works — Policy, Economics, and Cost",
+      "goal": "Understand the policy and economic structures that shape how care is delivered, paid for, and why costs are high.",
+      "topics": [
+        {
+          "id": "hss-ch2-economics",
+          "title": "Policy and Economics",
+          "items": [
+            {
+              "id": "hss-0003",
+              "type": "lesson",
+              "title": "Healthcare Policy and Economics",
+              "file": "lessons/hss-0003-healthcare-policy-and-economics.html"
+            },
+            {
+              "id": "hss-0004",
+              "type": "lesson",
+              "title": "Drivers of Healthcare Cost",
+              "file": "lessons/hss-0004-drivers-of-healthcare-cost.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hss-ch3",
+      "number": 3,
+      "title": "Systems Thinking, Quality, and Safety",
+      "goal": "Develop the cognitive habit of seeing problems as system outputs, and apply it to quality improvement and patient safety.",
+      "topics": [
+        {
+          "id": "hss-ch3-systems",
+          "title": "Systems Thinking in Practice",
+          "items": [
+            {
+              "id": "hss-0005",
+              "type": "lesson",
+              "title": "Zooming the Lens Out — Quality Improvement and Patient Safety",
+              "file": "lessons/hss-0005-zooming-the-lens-out.html"
             }
           ]
         }
