@@ -5,8 +5,8 @@ chapter_title: "Systems Thinking, Quality, and Safety"
 lesson_id: hss-0005
 title: "Zooming the Lens Out — Quality Improvement and Patient Safety"
 description: "Systems thinking is the linking domain of HSS — it connects every other domain by teaching you to see problems as system outputs, not isolated events. Quality improvement and patient safety are its two most important applications."
-prev: hss-0004-drivers-of-healthcare-cost.html
-prev_title: "Drivers of Healthcare Cost"
+prev: hss-0004b-responding-to-cost.html
+prev_title: "Waste, Transparency, and Responding to Cost"
 next: null
 next_title: null
 knowledge_check:

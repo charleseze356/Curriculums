@@ -47,6 +47,12 @@
               "type": "lesson",
               "title": "Drivers of Healthcare Cost",
               "file": "lessons/hss-0004-drivers-of-healthcare-cost.html"
+            },
+            {
+              "id": "hss-0004b",
+              "type": "lesson",
+              "title": "Waste, Transparency, and Responding to Cost",
+              "file": "lessons/hss-0004b-responding-to-cost.html"
             }
           ]
         }
