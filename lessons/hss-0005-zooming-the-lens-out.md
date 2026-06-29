@@ -7,8 +7,8 @@ title: "Zooming the Lens Out — Quality Improvement and Patient Safety"
 description: "Systems thinking is the linking domain of HSS — it connects every other domain by teaching you to see problems as system outputs, not isolated events. Quality improvement and patient safety are its two most important applications."
 prev: hss-0004b-responding-to-cost.html
 prev_title: "Waste, Transparency, and Responding to Cost"
-next: null
-next_title: null
+next: hss-0006-epipen-drug-pricing.html
+next_title: "The EpiPen — Drug Pricing and Physician Advocacy"
 knowledge_check:
   - q: "What does it mean to 'zoom the lens out' in the context of a medical error? How is this different from the traditional (individual-blame) approach?"
     a: "Zooming out means asking: 'What system conditions allowed this error to occur?' instead of 'Who made the mistake?' The traditional approach blames the individual (the nurse who gave the wrong dose, the physician who misread the chart). The systems approach asks why the system made the error easy to commit and hard to catch — was the labeling confusing? Were the workarounds predictable? Was fatigue a factor? The individual-blame approach fixes one person; the systems approach fixes the conditions that will produce the same error with the next person."
