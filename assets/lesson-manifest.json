@@ -77,6 +77,32 @@
           ]
         }
       ]
+    },
+    {
+      "id": "hss-ch4",
+      "number": 4,
+      "title": "Leadership, Advocacy, and Teams",
+      "goal": "Understand the physician's role as a systems designer, team leader, and advocate — and how teams prevent the errors that kill patients.",
+      "topics": [
+        {
+          "id": "hss-ch4-advocacy",
+          "title": "Advocacy and Leadership",
+          "items": [
+            {
+              "id": "hss-0006",
+              "type": "lesson",
+              "title": "The EpiPen — Drug Pricing and Physician Advocacy",
+              "file": "lessons/hss-0006-epipen-drug-pricing.html"
+            },
+            {
+              "id": "hss-0007",
+              "type": "lesson",
+              "title": "Bringing it All Together — Leadership and Teams in Today's Health System",
+              "file": "lessons/hss-0007-bringing-it-all-together.html"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
