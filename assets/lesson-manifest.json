@@ -53,6 +53,12 @@
               "type": "lesson",
               "title": "Waste, Transparency, and Responding to Cost",
               "file": "lessons/hss-0004b-responding-to-cost.html"
+            },
+            {
+              "id": "hss-0008",
+              "type": "lesson",
+              "title": "Value-Based Care — Reimagining How Care is Delivered",
+              "file": "lessons/hss-0008-value-based-care.html"
             }
           ]
         }
@@ -99,6 +105,26 @@
               "type": "lesson",
               "title": "Bringing it All Together — Leadership and Teams in Today's Health System",
               "file": "lessons/hss-0007-bringing-it-all-together.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hss-ch5",
+      "number": 5,
+      "title": "Population Health — From Individual to Population",
+      "goal": "Shift from treating individual patients to managing population health — prevention over treatment, teams over solo practice, data over anecdote.",
+      "topics": [
+        {
+          "id": "hss-ch5-pophealth",
+          "title": "The Population Perspective",
+          "items": [
+            {
+              "id": "hss-0009",
+              "type": "lesson",
+              "title": "Population Health — Shifting from Individual to Population",
+              "file": "lessons/hss-0009-population-health.html"
             }
           ]
         }
