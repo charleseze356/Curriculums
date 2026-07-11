@@ -10,7 +10,7 @@
       "topics": [
         {
           "id": "psych-ch1-frame",
-          "title": "The psychiatric frame",
+          "title": "COMAT Dim. 2 — History & Physical / Diagnosis (30–45%)",
           "items": [
             {
               "id": "psych-0001",
@@ -40,7 +40,7 @@
         },
         {
           "id": "psych-ch1-mood",
-          "title": "Mood and safety",
+          "title": "COMAT Dim. 1 — Depressive, Bipolar & Related Disorders (20–25%)",
           "items": [
             {
               "id": "psych-0005",
@@ -69,6 +69,30 @@
           ]
         }
       ]
+    },
+    {
+      "id": "psych-ch2",
+      "number": 2,
+      "title": "COMAT: Anxiety/Trauma/OCD (20–25%) + Personality Disorders (5–8%)",
+      "goal": "Blueprint categories covered: Anxiety, Trauma/Stressor-Related, Dissociative, OCD-Related Disorders (20–25%); Personality Disorders (5–8%).",
+      "status": "planned",
+      "topics": []
+    },
+    {
+      "id": "psych-ch3",
+      "number": 3,
+      "title": "COMAT: Schizophrenia Spectrum (8–10%) + Substance-Related (8–10%) + Medical/Somatic Mimics (6–10%)",
+      "goal": "Blueprint categories covered: Schizophrenia Spectrum & Other Psychotic Disorders (8–10%); Substance-Related & Addictive Disorders (8–10%); Psychiatric Illness Due to Another Medical Condition, Somatic Symptom & Related Disorders (partial, 6–10%).",
+      "status": "planned",
+      "topics": []
+    },
+    {
+      "id": "psych-ch4",
+      "number": 4,
+      "title": "COMAT: Neurodevelopmental/Gender Dysphoria (9–15%) + Eating/Sleep/Sexual (5–6%) + Neurocognitive (9–10%)",
+      "goal": "Blueprint categories covered: Neurodevelopmental, Gender Dysphoria, Disruptive/Impulse-Control Disorders (9–15%); Feeding, Eating, Elimination, Sexual Dysfunction Disorders (5–6%); Neurocognitive Disorders (9–10%); Sleep-Wake Disorders (remainder of 6–10% shared category). Final COMAT case-formulation integration lesson closes this chapter.",
+      "status": "planned",
+      "topics": []
     }
   ]
 }

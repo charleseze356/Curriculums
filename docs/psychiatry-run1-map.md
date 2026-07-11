@@ -6,15 +6,15 @@ Source contract: **NBOME COMAT Clinical Psychiatry blueprint = completeness/targ
 
 | COMAT Dimension 1 target | Blueprint weight | Curriculum placement | Source status |
 |---|---:|---|---|
-| Anxiety disorders; trauma/stressor-related/dissociative disorders; obsessive-compulsive and related disorders | 20–25% | Week 2: anxiety/trauma/OCD chapter | Covered by FA Ch. 27; dissociative disorders need supplemental source if tested in depth |
-| Neurocognitive disorders | 9–10% | Week 1 source-triage; Week 4 neurocognitive/structured assessment appendix | Partly covered by FA via delirium/medical-ruleout; Alzheimer/Lewy body/Parkinson/vascular/Huntington/TBI/sensory aphasia require neuro/COMAT supplement |
-| Neurodevelopmental disorders; gender dysphoria; disruptive, impulse-control, conduct disorders | 9–15% | Week 4 pediatric/developmental + gender dysphoria | Covered partly by FA Ch. 27; impulse-control disorder needs supplement |
-| Depressive, bipolar, and related disorders | 20–25% | Week 1 mood + suicide lessons | Covered by FA Ch. 27; premenstrual dysphoric disorder needs supplement |
+| Anxiety disorders; trauma/stressor-related/dissociative disorders; obsessive-compulsive and related disorders | 20–25% | Week 2: anxiety/trauma/OCD chapter | Anxiety/trauma/OCD covered by FA Ch. 27. **Confirmed gap:** dissociative disorders (dissociative identity, depersonalization/derealization, dissociative amnesia/fugue) do not appear anywhere in the FA Clinical Algorithms book (checked all chapters, not just Psychiatry) — needs an outside source. |
+| Neurocognitive disorders | 9–10% | Week 1 source-triage; Week 4 neurocognitive/structured assessment appendix | **Resolved — cross-chapter, not missing.** Alzheimer's, Lewy body, vascular, and Huntington's dementia are covered in FA's Neurology chapter (Ch. 26, "Dementia" / "Neurodegenerative Movement Disorders"); TBI is covered in the Surgery/Trauma chapter (Ch. 10). Lesson should cite Ch. 26/Ch. 10 directly rather than treating this as a gap. |
+| Neurodevelopmental disorders; gender dysphoria; disruptive, impulse-control, conduct disorders | 9–15% | Week 4 pediatric/developmental + gender dysphoria | Conduct disorder, ODD, and kleptomania are covered in FA Ch. 27 (Pediatric Psychiatry algorithm, Fig. 27.19; SSRI indications table). **Remaining gap:** pyromania, intermittent explosive disorder, and pathological gambling as a formal impulse-control category are not in the book. |
+| Depressive, bipolar, and related disorders | 20–25% | Week 1 mood + suicide lessons | **Resolved.** Covered by FA Ch. 27, including premenstrual dysphoric disorder (listed under SSRI indications, p.790). No gap. |
 | Personality disorders | 5–8% | Week 2 personality chapter | Covered by FA Ch. 27 |
 | Schizophrenia spectrum and other psychotic disorders | 8–10% | Week 3 psychosis + antipsychotic chapter | Covered by FA Ch. 27 |
-| Psychiatric illness due to another medical condition; somatic symptom and related disorders; sleep-wake disorders | 6–10% | Week 1 source-triage; Week 3 somatic/medical mimic; Week 4 sleep | Covered partly by FA Ch. 27; PANDAS needs supplement |
-| Substance-related and addictive disorders | 8–10% | Week 3 substance chapter | Covered by FA Ch. 27; gambling disorder needs supplement |
-| Feeding, eating, and elimination disorders; sexual dysfunctions and paraphilic disorders | 5–6% | Week 4 eating/sleep/sexual/elimination | Covered partly by FA Ch. 27; enuresis/encopresis are only algorithm-level in FA and may need supplement |
+| Psychiatric illness due to another medical condition; somatic symptom and related disorders; sleep-wake disorders | 6–10% | Week 1 source-triage; Week 3 somatic/medical mimic; Week 4 sleep | Covered by FA Ch. 27. **Confirmed gap:** PANDAS does not appear anywhere in the book — needs an outside source if tested. |
+| Substance-related and addictive disorders | 8–10% | Week 3 substance chapter | Covered by FA Ch. 27. **Confirmed gap:** gambling disorder does not appear anywhere in the book — needs an outside source. |
+| Feeding, eating, and elimination disorders; sexual dysfunctions and paraphilic disorders | 5–6% | Week 4 eating/sleep/sexual/elimination | **Resolved.** Enuresis and encopresis are both covered in FA Ch. 27's Pediatric Psychiatry algorithm (Fig. 27.19), including management (desmopressin/alarms, laxatives/behavior modification). No gap. |
 
 ## COMAT Dimension 2 task overlay
 
