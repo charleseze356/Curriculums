@@ -129,6 +129,74 @@
           ]
         }
       ]
+    },
+    {
+      "id": "psych-ch1",
+      "number": 6,
+      "title": "Psychiatry Clerkship — Diagnostic Frame and Mood",
+      "goal": "Build the psychiatry diagnostic frame: psychiatric complaint triage, symptom-duration differentials, clinical formulation, mood disorders, and suicide safety decisions.",
+      "topics": [
+        {
+          "id": "psych-ch1-frame",
+          "title": "The psychiatric frame",
+          "items": [
+            {
+              "id": "psych-0001",
+              "type": "lesson",
+              "title": "Psych Clerkship Map — Complaint, Differential, Safety",
+              "file": "lessons/psych-0001-psychiatry-clerkship-map.html"
+            },
+            {
+              "id": "psych-0002",
+              "type": "lesson",
+              "title": "Primary vs Substance-Induced vs Medical Psychiatric Complaints",
+              "file": "lessons/psych-0002-primary-substance-medical.html"
+            },
+            {
+              "id": "psych-0003",
+              "type": "lesson",
+              "title": "Symptom Duration as the Differential Axis",
+              "file": "lessons/psych-0003-duration-axis.html"
+            },
+            {
+              "id": "psych-0004",
+              "type": "lesson",
+              "title": "The Interview-to-Formulation Loop",
+              "file": "lessons/psych-0004-interview-formulation-safety.html"
+            }
+          ]
+        },
+        {
+          "id": "psych-ch1-mood",
+          "title": "Mood and safety",
+          "items": [
+            {
+              "id": "psych-0005",
+              "type": "lesson",
+              "title": "Mood Disorders Map",
+              "file": "lessons/psych-0005-mood-map.html"
+            },
+            {
+              "id": "psych-0006",
+              "type": "lesson",
+              "title": "MDD and the Depressive Spectrum",
+              "file": "lessons/psych-0006-mdd-depressive-spectrum.html"
+            },
+            {
+              "id": "psych-0007",
+              "type": "lesson",
+              "title": "Bipolar I/II and Mania Management",
+              "file": "lessons/psych-0007-bipolar-mania.html"
+            },
+            {
+              "id": "psych-0008",
+              "type": "lesson",
+              "title": "Suicide Risk and Level-of-Care Decisions",
+              "file": "lessons/psych-0008-suicide-risk-safety.html"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
