@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0006
 title: "MDD and the Depressive Spectrum"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Major depression is not just low mood; it is a syndrome requiring severity, duration, safety assessment, and treatment matching."
 prev: psych-0005-mood-map.html
 prev_title: "Mood Disorders Map"

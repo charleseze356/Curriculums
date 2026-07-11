@@ -1,13 +1,15 @@
 ---
 layout: default
 ---
+{% assign curriculum_home = page.curriculum_home | default: '/' %}
+{% assign curriculum_title = page.curriculum_title | default: 'Curriculums' %}
 
-<a class="home-btn" href="{{ '/' | relative_url }}"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7L7 2L12 7V12H9V9H5V12H2V7Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg> Home</a>
+<a class="home-btn" href="{{ curriculum_home | relative_url }}"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7L7 2L12 7V12H9V9H5V12H2V7Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg> Home</a>
 
 <div class="lesson-wrapper">
 
   <nav class="breadcrumb">
-    <a href="{{ '/' | relative_url }}">Curriculums</a>
+    <a href="{{ curriculum_home | relative_url }}">{{ curriculum_title }}</a>
     <span>›</span>
     Chapter {{ page.chapter }}: {{ page.chapter_title }}
   </nav>

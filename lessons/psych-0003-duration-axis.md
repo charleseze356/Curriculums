@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0003
 title: "Symptom Duration as the Differential Axis"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Many psychiatric diagnoses are separated less by symptom flavor than by timing: days, weeks, months, and years change the label."
 prev: psych-0002-primary-substance-medical.html
 prev_title: "Primary vs Substance-Induced vs Medical Psychiatric Complaints"

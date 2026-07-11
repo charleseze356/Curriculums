@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0005
 title: "Mood Disorders Map"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Mood disorders are organized by abnormal mood, medical/substance rule-out, depressive vs manic polarity, psychotic features, and chronicity."
 prev: psych-0004-interview-formulation-safety.html
 prev_title: "The Interview-to-Formulation Loop"

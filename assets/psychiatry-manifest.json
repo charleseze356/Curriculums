@@ -1,10 +1,10 @@
 {
   "subject": "Psychiatry Clerkship",
-  "source_contract": "Syllabus = completeness; FA Step 2 CK Psychiatry = primary content; FA Clinical Algorithms = management grounding; FA Q&A = clinical-application check style.",
+  "source_contract": "NBOME COMAT Clinical Psychiatry blueprint = completeness/target; FA Step 2 CK Psychiatry = primary content; FA Clinical Algorithms = management grounding; FA Q&A = clinical-application check style.",
   "chapters": [
     {
       "id": "psych-ch1",
-      "number": 6,
+      "number": 1,
       "title": "Psychiatry Clerkship — Diagnostic Frame and Mood",
       "goal": "Build the psychiatry diagnostic frame: psychiatric complaint triage, symptom-duration differentials, clinical formulation, mood disorders, and suicide safety decisions.",
       "topics": [

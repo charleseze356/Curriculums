@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0008
 title: "Suicide Risk and Level-of-Care Decisions"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Suicide questions are disposition questions: weigh plan, intent, acute/chronic risk, protective factors, lethal means, and level of care."
 prev: psych-0007-bipolar-mania.html
 prev_title: "Bipolar I/II and Mania Management"
@@ -16,8 +18,8 @@ knowledge_check:
     a: "Because FA's example includes depression with psychotic features, hopelessness, living alone, and failed outpatient medications. Risk is not determined by wording alone; context and protective factors matter."
   - q: "What protective factors can lower acute risk in a patient with suicidal thoughts but no intent?"
     a: "Coping skills, religion/cultural beliefs, social support, connection to a mental health provider, and limited access to lethal means."
-  - q: "Which syllabus objective is only partially covered by FA here?"
-    a: "Suicide risk is covered, but homicide risk factors are not directly detailed in the primary text. That should be flagged for a clerkship-specific resource rather than invented."
+  - q: "Which COMAT objective is only partially covered by FA here?"
+    a: "The COMAT objective includes suicide and homicidal-ideation risk assessment. FA gives a strong suicide-risk framework, but homicidal-ideation risk is not detailed in the FA psychiatry section."
 ---
 
 *This lesson zooms into safety from the mood and interview maps. Place it after mood disorders because depressive and bipolar presentations often become clinically urgent through suicide risk.*
@@ -51,6 +53,6 @@ FA organizes suicidality around **acute/chronic risk vs protective factors** and
 
 ---
 
-## Source gap: homicide risk
+## Source gap: homicidal ideation risk
 
-The syllabus requires identifying risk factors for suicide/homicide. FA Ch. 27-17 gives a usable suicide framework but does not provide an equivalent homicide-risk framework in the psychiatry section. That item remains flagged for a clerkship-specific resource.
+The COMAT learner objectives explicitly include risk assessment for suicide and homicidal ideation. FA Ch. 27-17 gives a usable suicide framework but does not provide an equivalent homicidal-ideation framework in the psychiatry section. That item remains flagged for a COMAT/clerkship supplement rather than invented.

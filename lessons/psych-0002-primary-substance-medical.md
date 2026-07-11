@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0002
 title: "Primary vs Substance-Induced vs Medical Psychiatric Complaints"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Before naming a psychiatric disorder, decide whether the symptoms are primary psychiatric, substance-induced, or due to another medical condition."
 prev: psych-0001-psychiatry-clerkship-map.html
 prev_title: "Psych Clerkship Map — Complaint, Differential, Safety"

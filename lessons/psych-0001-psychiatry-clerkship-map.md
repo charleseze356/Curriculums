@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0001
 title: "Psych Clerkship Map — Complaint, Differential, Safety"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "The whole psychiatry curriculum starts with one frame: locate the complaint, rule out medical/substance causes, then make a diagnosis safe enough to treat."
 prev: null
 prev_title: null
@@ -12,8 +14,8 @@ next_title: "Primary vs Substance-Induced vs Medical Psychiatric Complaints"
 knowledge_check:
   - q: "A patient presents with hallucinations. Why is 'schizophrenia?' the wrong first move?"
     a: "Because FA's first branch is primary psychiatric vs substance-induced vs medical. If you skip the rule-out layer, you can mislabel delirium, intoxication, endocrine disease, infection, or neurologic disease as a primary psychotic disorder."
-  - q: "What does the syllabus make the curriculum accountable for beyond memorizing diagnoses?"
-    a: "It requires symptom constellations, overlap-based differential diagnosis, suicide/homicide risk recognition, patient interview acuity, formulation, workup, treatment planning, and safety."
+  - q: "What does the COMAT blueprint make the curriculum accountable for beyond memorizing diagnoses?"
+    a: "It weights both presentations and physician tasks: high-yield disorder families, diagnosis from history/physical, management, diagnostic technologies, mechanisms, health promotion, and emergency risk decisions."
   - q: "Why is mood placed early in this map before psychosis?"
     a: "Because psychotic symptoms can be embedded inside mood episodes. You need the mood framework before distinguishing schizoaffective disorder from mood disorder with psychotic features."
   - q: "What is the shelf-style use of this curriculum?"
@@ -26,20 +28,15 @@ knowledge_check:
 
 Psychiatry on exams and rotations is not a list of DSM labels. It is a **sorting problem under safety pressure**: decide whether the presentation is primary psychiatric, substance-induced, or medical; use time course and symptom pattern to narrow the differential; then decide what level of care and treatment is safe.
 
-*Sources: FA Step 2 CK 8E, Psychiatry Ch. 27-1; Psychiatry Clerkship Syllabus objectives #1–6.*
+*Sources: FA Step 2 CK 8E, Psychiatry Ch. 27-1; NBOME COMAT Clinical Psychiatry blueprint, Dimension 1/2 and selected learner-centered objectives.*
 
 ---
 
-## The clerkship's load-bearing demands
+## The COMAT blueprint's load-bearing demands
 
-The syllabus asks for six linked capabilities:
+The COMAT blueprint gives two targets: clinical presentations and physician tasks. The highest-weight presentation blocks are mood disorders and anxiety/trauma/OCD; the highest-weight task blocks are diagnosis from history/physical and management.
 
-1. Define symptom constellations of common psychiatric diagnoses.
-2. Recognize presentations across childhood, adulthood, and older adulthood.
-3. Use symptom overlap to build a differential diagnosis.
-4. Identify suicide/homicide risk factors.
-5. Interview a patient, assess acuity, and present diagnosis/workup/treatment/safety.
-6. Write a DSM-5 biopsychosocial formulation with diagnosis and treatment plan.
+The selected objectives also require holistic care, psychiatric evaluations/MSE/risk assessments, inpatient/outpatient management, multifaceted treatment plans, psychotropic and nonpharmacologic treatment choices, and emergency/withdrawal management.
 
 The curriculum is organized around those moves, not around rote disorder lists.
 
@@ -52,10 +49,10 @@ The curriculum is organized around those moves, not around rote disorder lists.
 | Complaint triage | You cannot diagnose a primary psychiatric disorder until medical and substance causes are considered. |
 | Duration axis | Many psychiatric differentials are separated by time thresholds. |
 | Interview/formulation/safety | The clerkship grades clinical reasoning, not just recognition. |
-| Mood + suicide | Mood disorders are common and create safety decisions. |
-| Anxiety/trauma/OCD | These require distinguishing fear, worry, trauma, and compulsive relief loops. |
+| Mood + suicide | Mood disorders are a 20–25% COMAT block and create safety decisions. |
+| Anxiety/trauma/OCD | This is also a 20–25% COMAT block and requires distinguishing fear, worry, trauma, dissociation, and compulsive relief loops. |
 | Psychosis + antipsychotics | Reality-testing disorders depend on ruling out mood/substance/medical causes. |
-| Personality/substance/somatic/eating/sleep/sexual/pediatric | These fill the remaining FA psychiatry map and common clinical mimics. |
+| Personality/substance/somatic/eating/sleep/sexual/pediatric/neurocognitive | These complete the COMAT blueprint and common clinical mimics. |
 
 ---
 

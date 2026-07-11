@@ -1,9 +1,11 @@
 ---
 layout: lesson
-chapter: 6
+chapter: 1
 chapter_title: "Psychiatry Clerkship — Diagnostic Frame and Mood"
 lesson_id: psych-0007
 title: "Bipolar I/II and Mania Management"
+curriculum_home: /psychiatry.html
+curriculum_title: "Psychiatry Clerkship"
 description: "Bipolar diagnosis depends on manic vs hypomanic episodes, and management depends on agitation, psychosis, pregnancy, renal disease, and antidepressant exposure."
 prev: psych-0006-mdd-depressive-spectrum.html
 prev_title: "MDD and the Depressive Spectrum"
