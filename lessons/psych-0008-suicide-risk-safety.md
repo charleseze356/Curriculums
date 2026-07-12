@@ -9,8 +9,8 @@ curriculum_title: "Psychiatry Clerkship"
 description: "Suicide questions are disposition questions: weigh plan, intent, acute/chronic risk, protective factors, lethal means, and level of care."
 prev: psych-0007-bipolar-mania.html
 prev_title: "Bipolar I/II and Mania Management"
-next: null
-next_title: null
+next: psych-0009-anxiety-map.html
+next_title: "Anxiety, Trauma, and OCD Map"
 knowledge_check:
   - q: "A patient has command hallucinations, homelessness, amphetamine use, plan, and intent to jump from a bridge. What is the level-of-care move?"
     a: "High acute risk: consider voluntary or involuntary hospitalization, remove lethal means, stabilize, and treat underlying psychotic/mood/substance drivers."

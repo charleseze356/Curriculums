@@ -75,8 +75,29 @@
       "number": 2,
       "title": "COMAT: Anxiety/Trauma/OCD (20–25%) + Personality Disorders (5–8%)",
       "goal": "Blueprint categories covered: Anxiety, Trauma/Stressor-Related, Dissociative, OCD-Related Disorders (20–25%); Personality Disorders (5–8%).",
-      "status": "planned",
-      "topics": []
+      "topics": [
+        {
+          "id": "psych-ch2-anxiety",
+          "title": "COMAT Dim. 1 — Anxiety, Trauma/Stressor, Dissociative & OCD-Related Disorders (20–25%)",
+          "items": [
+            {"id":"psych-0009","type":"lesson","title":"Anxiety, Trauma, and OCD Map","file":"lessons/psych-0009-anxiety-map.html"},
+            {"id":"psych-0010","type":"lesson","title":"GAD, Panic, Social Anxiety, and Specific Phobia","file":"lessons/psych-0010-gad-panic-phobias.html"},
+            {"id":"psych-0011","type":"lesson","title":"OCD, OCPD, and Related Disorders","file":"lessons/psych-0011-ocd-related-disorders.html"},
+            {"id":"psych-0012","type":"lesson","title":"Acute Stress, PTSD, Adjustment, and Dissociation","file":"lessons/psych-0012-trauma-stressor-dissociation.html"},
+            {"id":"psych-0013","type":"lesson","title":"Anxiolytics and Hypnotics: Relief vs Long-Term Risk","file":"lessons/psych-0013-anxiolytics-hypnotics.html"}
+          ]
+        },
+        {
+          "id": "psych-ch2-personality",
+          "title": "COMAT Dim. 1 — Personality Disorders (5–8%)",
+          "items": [
+            {"id":"psych-0014","type":"lesson","title":"Personality Disorders Map: Weird, Wild, Worried","file":"lessons/psych-0014-personality-map.html"},
+            {"id":"psych-0015","type":"lesson","title":"Cluster A: Oddness With Intact Reality Testing","file":"lessons/psych-0015-cluster-a-intact-reality.html"},
+            {"id":"psych-0016","type":"lesson","title":"Cluster B: Risk and Relationship Instability","file":"lessons/psych-0016-cluster-b-instability.html"},
+            {"id":"psych-0017","type":"lesson","title":"Cluster C: Anxiety-Shaped Personality Patterns","file":"lessons/psych-0017-cluster-c-anxious-patterns.html"}
+          ]
+        }
+      ]
     },
     {
       "id": "psych-ch3",
