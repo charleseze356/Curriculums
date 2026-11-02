@@ -64,4 +64,3 @@ The original YouTube description states that the video is freely available for e
 - vidIQ English caption text SHA-256: `41bd1657123290fdbd2cb732cfd18f77c10f475a95e377959bffd808c0b8aec9`
 - Transcript fetch: successful after reauthentication; returned usage: 5 credits.
 - Full transcript retained in the task’s private working files, not published here.
-- RemNote backlink: not added. No RemNote tool or existing parent note for this new subject was available in this session.
