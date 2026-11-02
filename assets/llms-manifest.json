@@ -1,0 +1,210 @@
+{
+  "subject": "How LLMs Work — Karpathy",
+  "source_contract": "Scope: every chapter in Karpathy’s February 5, 2025 video. Primary content: the video and its timestamped English captions, retrieved directly from YouTube and through vidIQ. No separate syllabus was supplied. Editorial dependency order is distinguished from source claims.",
+  "source_url": "https://www.youtube.com/watch?v=7xTGNNLPyMI",
+  "source_date": "2025-02-05",
+  "chapters": [
+    {
+      "id": "llm-ch1",
+      "number": 1,
+      "title": "The token prediction engine",
+      "goal": "Follow the path from internet text to a model that can generate new text. Data, tokens, weights, and context are different parts of this mechanism.",
+      "topics": [
+        {
+          "id": "llm-ch1-path",
+          "title": "Study in dependency order",
+          "items": [
+            {
+              "id": "llm-0001",
+              "type": "lesson",
+              "title": "The map: training builds the engine; inference runs it",
+              "file": "lessons/llm-0001-engine-map.html"
+            },
+            {
+              "id": "llm-0002",
+              "type": "lesson",
+              "title": "Data selection determines what the model gets to learn from",
+              "file": "lessons/llm-0002-data-selection.html"
+            },
+            {
+              "id": "llm-0003",
+              "type": "lesson",
+              "title": "Tokens are the model’s units of text",
+              "file": "lessons/llm-0003-token-representation.html"
+            },
+            {
+              "id": "llm-0004",
+              "type": "lesson",
+              "title": "Training changes weights to improve next-token predictions",
+              "file": "lessons/llm-0004-training-weights.html"
+            },
+            {
+              "id": "llm-0005",
+              "type": "lesson",
+              "title": "Inference repeatedly selects and appends a token",
+              "file": "lessons/llm-0005-inference-and-scale.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llm-ch2",
+      "number": 2,
+      "title": "From base model to assistant",
+      "goal": "Use the prediction engine to explain why conversation formatting and supervised examples change the behavior of a base model.",
+      "topics": [
+        {
+          "id": "llm-ch2-path",
+          "title": "Study in dependency order",
+          "items": [
+            {
+              "id": "llm-0006",
+              "type": "lesson",
+              "title": "The map: an assistant is a trained role",
+              "file": "lessons/llm-0006-assistant-map.html"
+            },
+            {
+              "id": "llm-0007",
+              "type": "lesson",
+              "title": "A base model continues a document",
+              "file": "lessons/llm-0007-base-models.html"
+            },
+            {
+              "id": "llm-0008",
+              "type": "lesson",
+              "title": "Conversation structure becomes a token sequence",
+              "file": "lessons/llm-0008-conversation-protocol.html"
+            },
+            {
+              "id": "llm-0009",
+              "type": "lesson",
+              "title": "Supervised fine-tuning teaches by example",
+              "file": "lessons/llm-0009-supervised-imitation.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llm-ch3",
+      "number": 3,
+      "title": "Learning from outcomes",
+      "goal": "Distinguish imitation from practice with feedback; then distinguish reliable outcomes from learned preference scores.",
+      "topics": [
+        {
+          "id": "llm-ch3-path",
+          "title": "Study in dependency order",
+          "items": [
+            {
+              "id": "llm-0010",
+              "type": "lesson",
+              "title": "The map: imitation and outcome feedback teach differently",
+              "file": "lessons/llm-0010-outcome-learning-map.html"
+            },
+            {
+              "id": "llm-0011",
+              "type": "lesson",
+              "title": "Reinforcement learning rewards successful attempts",
+              "file": "lessons/llm-0011-reinforcement-loop.html"
+            },
+            {
+              "id": "llm-0012",
+              "type": "lesson",
+              "title": "Reasoning behavior can emerge under outcome training",
+              "file": "lessons/llm-0012-reasoning-models.html"
+            },
+            {
+              "id": "llm-0013",
+              "type": "lesson",
+              "title": "AlphaGo shows why the scoring environment matters",
+              "file": "lessons/llm-0013-alphago-and-evaluation.html"
+            },
+            {
+              "id": "llm-0014",
+              "type": "lesson",
+              "title": "RLHF optimizes a learned proxy for human preference",
+              "file": "lessons/llm-0014-rlhf-proxy.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llm-ch4",
+      "number": 4,
+      "title": "Why useful models still fail",
+      "goal": "Derive practical limitations from representation, available context, training examples, and computation. These lessons depend on the training map.",
+      "topics": [
+        {
+          "id": "llm-ch4-path",
+          "title": "Study in dependency order",
+          "items": [
+            {
+              "id": "llm-0015",
+              "type": "lesson",
+              "title": "The map: diagnose the source of a failure",
+              "file": "lessons/llm-0015-reliability-map.html"
+            },
+            {
+              "id": "llm-0016",
+              "type": "lesson",
+              "title": "Grounding puts the source into the current context",
+              "file": "lessons/llm-0016-grounding-and-tools.html"
+            },
+            {
+              "id": "llm-0017",
+              "type": "lesson",
+              "title": "A model’s self-description is generated output",
+              "file": "lessons/llm-0017-self-description.html"
+            },
+            {
+              "id": "llm-0018",
+              "type": "lesson",
+              "title": "Intermediate tokens can carry intermediate computation",
+              "file": "lessons/llm-0018-computation-over-tokens.html"
+            },
+            {
+              "id": "llm-0019",
+              "type": "lesson",
+              "title": "Easy for a person can be awkward for token prediction",
+              "file": "lessons/llm-0019-representation-and-jaggedness.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llm-ch5",
+      "number": 5,
+      "title": "Beyond a single text response",
+      "goal": "Place multimodality, agents, and model access around the same core engine. Keep the lecture’s February 2025 forecasts separate from current facts.",
+      "topics": [
+        {
+          "id": "llm-ch5-path",
+          "title": "Study in dependency order",
+          "items": [
+            {
+              "id": "llm-0020",
+              "type": "lesson",
+              "title": "The map: new media still need a representation",
+              "file": "lessons/llm-0020-extensions-map.html"
+            },
+            {
+              "id": "llm-0021",
+              "type": "lesson",
+              "title": "Long-running agents expose the problem of state",
+              "file": "lessons/llm-0021-agents-and-state.html"
+            },
+            {
+              "id": "llm-0022",
+              "type": "lesson",
+              "title": "Separate the model from where you run it",
+              "file": "lessons/llm-0022-access-and-integration.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
